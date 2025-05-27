@@ -23,10 +23,12 @@ import {
   DollarSign,
   Eye,
   XCircle,
-  CheckCircle
+  CheckCircle,
+  RefreshCw
 } from "lucide-react"
 
 interface OrderItem {
+  id: number
   product_id: number
   product_name: string
   quantity: number
@@ -39,6 +41,7 @@ interface Order {
   total_amount: number
   status: string
   created_at: string
+  payment_intent_id: string
   item_count: number
   items: OrderItem[]
 }
@@ -59,6 +62,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [ordersLoading, setOrdersLoading] = useState(false)
   const [editingProfile, setEditingProfile] = useState(false)
   const [editingPassword, setEditingPassword] = useState(false)
   
@@ -146,10 +150,13 @@ export default function ProfilePage() {
         description: "Failed to load profile",
         variant: "destructive"
       })
+    } finally {
+      setLoading(false)
     }
   }
 
   const fetchOrders = async () => {
+    setOrdersLoading(true)
     try {
       console.log('Fetching orders...')
       const headers = getAuthHeaders()
@@ -163,16 +170,10 @@ export default function ProfilePage() {
       
       if (response.ok) {
         const ordersData = await response.json()
-        console.log('Orders data received:', ordersData)
+        console.log('Raw orders data received:', ordersData)
         
-        // Process the orders data to handle the items properly
-        const processedOrders = ordersData.map((order: any) => ({
-          ...order,
-          items: order.items || [],
-          item_count: order.item_count || order.items?.length || 0
-        }))
-        
-        setOrders(processedOrders)
+        // The backend now returns the correct structure
+        setOrders(ordersData)
       } else if (response.status === 401) {
         console.log('Unauthorized, logging out')
         logout()
@@ -180,6 +181,11 @@ export default function ProfilePage() {
         console.error('Orders fetch failed with status:', response.status)
         const errorText = await response.text()
         console.error('Error response:', errorText)
+        toast({
+          title: "Error",
+          description: "Failed to load orders",
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error("Error fetching orders:", error)
@@ -189,7 +195,8 @@ export default function ProfilePage() {
         variant: "destructive"
       })
     } finally {
-      setLoading(false)
+      setOrdersLoading(false)
+      if (loading) setLoading(false)
     }
   }
 
@@ -327,6 +334,17 @@ export default function ProfilePage() {
       case "delivered": return "bg-emerald-500"
       case "cancelled": return "bg-red-500"
       default: return "bg-gray-500"
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "created": return "Order Placed"
+      case "confirmed": return "Confirmed"
+      case "shipped": return "Shipped"
+      case "delivered": return "Delivered"
+      case "cancelled": return "Cancelled"
+      default: return status
     }
   }
 
@@ -515,12 +533,32 @@ export default function ProfilePage() {
           <TabsContent value="orders" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-semibold">Order History</h2>
-              <div className="text-sm text-gray-600">
-                Total Orders: {orders.length}
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchOrders}
+                  disabled={ordersLoading}
+                >
+                  {ordersLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2"></div>
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  Refresh
+                </Button>
+                <div className="text-sm text-gray-600">
+                  Total Orders: {orders.length}
+                </div>
               </div>
             </div>
 
-            {orders.length === 0 ? (
+            {ordersLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                <p>Loading orders...</p>
+              </div>
+            ) : orders.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-12">
                   <ShoppingBag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -541,7 +579,7 @@ export default function ProfilePage() {
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-semibold">Order #{order.id}</h3>
                             <Badge className={getStatusColor(order.status) + " text-white"}>
-                              {order.status}
+                              {getStatusText(order.status)}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -577,7 +615,7 @@ export default function ProfilePage() {
                         <div className="border-t pt-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             {order.items.slice(0, 3).map((item, index) => (
-                              <div key={index} className="flex items-center gap-2 text-sm">
+                              <div key={item.id || index} className="flex items-center gap-2 text-sm">
                                 <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
                                   {item.image_url ? (
                                     <img 

@@ -564,26 +564,28 @@ async def get_user_orders(
     skip: int = 0,
     limit: int = 20
 ):
+    # Get orders with items separately to avoid array aggregation issues
     orders = await sql("""
-        SELECT o.*, 
-               COUNT(oi.id) as item_count,
-               ARRAY_AGG(
-                   JSON_BUILD_OBJECT(
-                       'product_id', oi.product_id,
-                       'product_name', p.name,
-                       'quantity', oi.quantity,
-                       'price', oi.price,
-                       'image_url', p.image_url
-                   )
-               ) as items
+        SELECT o.id, o.total_amount, o.status, o.created_at, o.payment_intent_id,
+               COUNT(oi.id) as item_count
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.id
         WHERE o.user_id = $1
-        GROUP BY o.id
+        GROUP BY o.id, o.total_amount, o.status, o.created_at, o.payment_intent_id
         ORDER BY o.created_at DESC
         LIMIT $2 OFFSET $3
     """, [current_user["id"], limit, skip])
+    
+    # Get items for each order
+    for order in orders:
+        items = await sql("""
+            SELECT oi.id, oi.product_id, oi.quantity, oi.price,
+                   p.name as product_name, p.image_url
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = $1
+        """, [order["id"]])
+        order["items"] = items
     
     return orders
 
@@ -592,29 +594,29 @@ async def get_order_details(
     order_id: int,
     current_user: dict = Depends(get_current_user)
 ):
+    # Get order details
     order = await sql("""
-        SELECT o.*, 
-               ARRAY_AGG(
-                   JSON_BUILD_OBJECT(
-                       'id', oi.id,
-                       'product_id', oi.product_id,
-                       'product_name', p.name,
-                       'quantity', oi.quantity,
-                       'price', oi.price,
-                       'image_url', p.image_url
-                   )
-               ) as items
+        SELECT o.id, o.total_amount, o.status, o.created_at, o.payment_intent_id
         FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.id
         WHERE o.id = $1 AND o.user_id = $2
-        GROUP BY o.id
     """, [order_id, current_user["id"]])
     
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    return order[0]
+    # Get order items
+    items = await sql("""
+        SELECT oi.id, oi.product_id, oi.quantity, oi.price,
+               p.name as product_name, p.image_url
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = $1
+    """, [order_id])
+    
+    order_details = order[0]
+    order_details["items"] = items
+    
+    return order_details
 
 @app.put("/orders/{order_id}/cancel")
 async def cancel_order(
@@ -632,6 +634,35 @@ async def cancel_order(
     await sql("UPDATE orders SET status = 'cancelled' WHERE id = $1", [order_id])
     
     return {"message": "Order cancelled successfully"}
+
+class OrderStatusUpdate(BaseModel):
+    status: str
+
+@app.put("/orders/{order_id}/status")
+async def update_order_status(
+    order_id: int,
+    status_update: OrderStatusUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    # Check if user is admin or vendor
+    if current_user["role"] not in [UserRole.ADMIN, UserRole.VENDOR]:
+        raise HTTPException(status_code=403, detail="Not authorized to update order status")
+    
+    # Valid statuses
+    valid_statuses = ["created", "confirmed", "shipped", "delivered", "cancelled"]
+    if status_update.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+    
+    # Update order status
+    result = await sql(
+        "UPDATE orders SET status = $1 WHERE id = $2 RETURNING *",
+        [status_update.status, order_id]
+    )
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    return {"message": f"Order status updated to {status_update.status}"}
 
 if __name__ == "__main__":
     import uvicorn
