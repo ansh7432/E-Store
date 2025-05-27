@@ -10,8 +10,17 @@ import os
 from enum import Enum
 import asyncpg
 from dotenv import load_dotenv
+import paypalrestsdk
+import json
 
 load_dotenv()  
+
+# PayPal Configuration
+paypalrestsdk.configure({
+    "mode": os.getenv("PAYPAL_MODE", "sandbox"),  # sandbox or live
+    "client_id": os.getenv("PAYPAL_CLIENT_ID"),
+    "client_secret": os.getenv("PAYPAL_CLIENT_SECRET")
+})
 
 # Database setup
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -93,7 +102,13 @@ class CartItemCreate(BaseModel):
     quantity: int
 
 class CheckoutRequest(BaseModel):
-    payment_method: str = "card"
+    payment_method: str = "paypal"
+    return_url: Optional[str] = "http://localhost:3000/payment/success"
+    cancel_url: Optional[str] = "http://localhost:3000/payment/cancel"
+
+class PayPalExecuteRequest(BaseModel):
+    payment_id: str
+    payer_id: str
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
@@ -514,14 +529,15 @@ async def remove_from_cart(
     await sql("DELETE FROM cart_items WHERE id = $1", [item_id])
     return {"message": "Item removed from cart"}
 
+# PayPal Payment endpoints
 @app.post("/checkout")
-async def checkout(
+async def create_payment(
     checkout_data: CheckoutRequest,
     current_user: dict = Depends(get_current_user)
 ):
     # Get cart items
     cart_items = await sql("""
-        SELECT ci.*, p.price 
+        SELECT ci.*, p.name, p.price, p.image_url 
         FROM cart_items ci 
         JOIN products p ON ci.product_id = p.id 
         WHERE ci.user_id = $1
@@ -533,29 +549,135 @@ async def checkout(
     # Calculate total
     total_amount = sum(item["price"] * item["quantity"] for item in cart_items)
     
-    # Create order
-    order_result = await sql(
-        "INSERT INTO orders (user_id, total_amount, payment_intent_id) VALUES ($1, $2, $3) RETURNING *",
-        [current_user["id"], total_amount, f"pi_mock_{int(datetime.utcnow().timestamp())}"]
-    )
-    order = order_result[0]
+    if checkout_data.payment_method == "paypal":
+        # Create PayPal payment
+        items = []
+        for item in cart_items:
+            items.append({
+                "name": item["name"],
+                "sku": str(item["product_id"]),
+                "price": str(item["price"]),
+                "currency": "USD",
+                "quantity": item["quantity"]
+            })
+        
+        payment = paypalrestsdk.Payment({
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": checkout_data.return_url,
+                "cancel_url": checkout_data.cancel_url
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": items
+                },
+                "amount": {
+                    "total": str(total_amount),
+                    "currency": "USD"
+                },
+                "description": f"Order for {current_user['username']}"
+            }]
+        })
+        
+        if payment.create():
+            # Store payment info temporarily (you might want to create a payments table)
+            order_result = await sql(
+                "INSERT INTO orders (user_id, total_amount, payment_intent_id, status) VALUES ($1, $2, $3, $4) RETURNING *",
+                [current_user["id"], total_amount, payment.id, "pending_payment"]
+            )
+            order = order_result[0]
+            
+            # Create order items
+            for cart_item in cart_items:
+                await sql(
+                    "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
+                    [order["id"], cart_item["product_id"], cart_item["quantity"], cart_item["price"]]
+                )
+            
+            # Get approval URL
+            approval_url = None
+            for link in payment.links:
+                if link.rel == "approval_url":
+                    approval_url = link.href
+                    break
+            
+            return {
+                "payment_id": payment.id,
+                "order_id": order["id"],
+                "approval_url": approval_url,
+                "total_amount": total_amount
+            }
+        else:
+            raise HTTPException(status_code=400, detail=f"PayPal payment creation failed: {payment.error}")
     
-    # Create order items
-    for cart_item in cart_items:
-        await sql(
-            "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
-            [order["id"], cart_item["product_id"], cart_item["quantity"], cart_item["price"]]
+    else:
+        # Fallback to mock payment for other methods
+        order_result = await sql(
+            "INSERT INTO orders (user_id, total_amount, payment_intent_id) VALUES ($1, $2, $3) RETURNING *",
+            [current_user["id"], total_amount, f"mock_{int(datetime.utcnow().timestamp())}"]
         )
-    
-    # Clear cart
-    await sql("DELETE FROM cart_items WHERE user_id = $1", [current_user["id"]])
-    
-    return {
-        "order_id": order["id"],
-        "total_amount": total_amount,
-        "payment_intent_id": order["payment_intent_id"],
-        "status": "created"
-    }
+        order = order_result[0]
+        
+        # Create order items
+        for cart_item in cart_items:
+            await sql(
+                "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
+                [order["id"], cart_item["product_id"], cart_item["quantity"], cart_item["price"]]
+            )
+        
+        # Clear cart
+        await sql("DELETE FROM cart_items WHERE user_id = $1", [current_user["id"]])
+        
+        return {
+            "order_id": order["id"],
+            "total_amount": total_amount,
+            "payment_intent_id": order["payment_intent_id"],
+            "status": "created"
+        }
+
+@app.post("/payment/execute")
+async def execute_payment(
+    payment_data: PayPalExecuteRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        # Find the payment and execute it
+        payment = paypalrestsdk.Payment.find(payment_data.payment_id)
+        
+        if payment.execute({"payer_id": payment_data.payer_id}):
+            # Payment successful, update order status
+            await sql(
+                "UPDATE orders SET status = 'created' WHERE payment_intent_id = $1 AND user_id = $2",
+                [payment_data.payment_id, current_user["id"]]
+            )
+            
+            # Clear cart
+            await sql("DELETE FROM cart_items WHERE user_id = $1", [current_user["id"]])
+            
+            # Get order details
+            order = await sql(
+                "SELECT * FROM orders WHERE payment_intent_id = $1 AND user_id = $2",
+                [payment_data.payment_id, current_user["id"]]
+            )
+            
+            return {
+                "status": "success",
+                "payment_id": payment.id,
+                "order_id": order[0]["id"] if order else None,
+                "message": "Payment completed successfully"
+            }
+        else:
+            raise HTTPException(status_code=400, detail=f"Payment execution failed: {payment.error}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Payment execution error: {str(e)}")
+
+@app.get("/payment/cancel")
+async def payment_cancelled():
+    return {"status": "cancelled", "message": "Payment was cancelled by user"}
 
 # Order management endpoints
 @app.get("/orders")
@@ -570,7 +692,7 @@ async def get_user_orders(
                COUNT(oi.id) as item_count
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
-        WHERE o.user_id = $1
+        WHERE o.user_id = $1 AND o.status != 'pending_payment'
         GROUP BY o.id, o.total_amount, o.status, o.created_at, o.payment_intent_id
         ORDER BY o.created_at DESC
         LIMIT $2 OFFSET $3
@@ -628,8 +750,8 @@ async def cancel_order(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    if order[0]["status"] != "created":
-        raise HTTPException(status_code=400, detail="Cannot cancel order that is not in created status")
+    if order[0]["status"] not in ["created", "pending_payment"]:
+        raise HTTPException(status_code=400, detail="Cannot cancel order that is not in created or pending status")
     
     await sql("UPDATE orders SET status = 'cancelled' WHERE id = $1", [order_id])
     
@@ -649,7 +771,7 @@ async def update_order_status(
         raise HTTPException(status_code=403, detail="Not authorized to update order status")
     
     # Valid statuses
-    valid_statuses = ["created", "confirmed", "shipped", "delivered", "cancelled"]
+    valid_statuses = ["created", "confirmed", "shipped", "delivered", "cancelled", "pending_payment"]
     if status_update.status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
     

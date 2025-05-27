@@ -1,21 +1,25 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 import { useCart } from "@/contexts/cart-context"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { Navbar } from "@/components/navbar"
-import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react"
+import { Trash2, Minus, Plus, ShoppingBag, CreditCard } from "lucide-react"
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, total, loading, fetchCart } = useCart()
   const { user, isAuthenticated } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
+  const [paymentMethod, setPaymentMethod] = useState("paypal")
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -28,6 +32,7 @@ export default function CartPage() {
   const handleCheckout = async () => {
     if (items.length === 0) return
 
+    setCheckoutLoading(true)
     try {
       const token = localStorage.getItem("token")
       if (!token) {
@@ -41,17 +46,28 @@ export default function CartPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ payment_method: "card" }),
+        body: JSON.stringify({ 
+          payment_method: paymentMethod,
+          return_url: `${window.location.origin}/payment/success`,
+          cancel_url: `${window.location.origin}/payment/cancel`
+        }),
       })
 
       if (response.ok) {
         const data = await response.json()
-        toast({
-          title: "Order placed successfully!",
-          description: `Order #${data.order_id} has been created`,
-        })
-        fetchCart() // This will clear the cart
-        router.push("/profile?tab=orders")
+        
+        if (paymentMethod === "paypal" && data.approval_url) {
+          // Redirect to PayPal for approval
+          window.location.href = data.approval_url
+        } else {
+          // For other payment methods, show success and redirect
+          toast({
+            title: "Order placed successfully!",
+            description: `Order #${data.order_id} has been created`,
+          })
+          fetchCart() // This will clear the cart
+          router.push("/profile?tab=orders")
+        }
       } else if (response.status === 401) {
         router.push("/auth/login")
       } else {
@@ -65,6 +81,8 @@ export default function CartPage() {
         description: error instanceof Error ? error.message : "Failed to process checkout",
         variant: "destructive",
       })
+    } finally {
+      setCheckoutLoading(false)
     }
   }
 
@@ -202,14 +220,44 @@ export default function CartPage() {
                       <span className="text-purple-600">${total.toFixed(2)}</span>
                     </div>
                   </div>
+
+                  {/* Payment Method Selection */}
+                  <div className="border-t pt-4">
+                    <h3 className="font-medium mb-3">Payment Method</h3>
+                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="paypal" id="paypal" />
+                        <Label htmlFor="paypal" className="flex items-center cursor-pointer">
+                          <div className="w-6 h-6 bg-blue-600 rounded mr-2 flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">P</span>
+                          </div>
+                          PayPal
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="card" id="card" />
+                        <Label htmlFor="card" className="flex items-center cursor-pointer">
+                          <CreditCard className="w-6 h-6 text-gray-600 mr-2" />
+                          Credit Card (Mock)
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
                   
                   <Button 
                     onClick={handleCheckout} 
                     className="w-full mt-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" 
                     size="lg"
-                    disabled={items.length === 0}
+                    disabled={items.length === 0 || checkoutLoading}
                   >
-                    Proceed to Checkout
+                    {checkoutLoading ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      `Proceed to Checkout (${paymentMethod === 'paypal' ? 'PayPal' : 'Mock Payment'})`
+                    )}
                   </Button>
                   
                   <Button 
