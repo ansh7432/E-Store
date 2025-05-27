@@ -16,11 +16,16 @@ import json
 load_dotenv()  
 
 # PayPal Configuration
-paypalrestsdk.configure({
-    "mode": os.getenv("PAYPAL_MODE", "sandbox"),  # sandbox or live
-    "client_id": os.getenv("PAYPAL_CLIENT_ID"),
-    "client_secret": os.getenv("PAYPAL_CLIENT_SECRET")
-})
+paypal_client_id = os.getenv("PAYPAL_CLIENT_ID")
+paypal_client_secret = os.getenv("PAYPAL_CLIENT_SECRET")
+paypal_mode = os.getenv("PAYPAL_MODE", "sandbox")
+
+if paypal_client_id and paypal_client_secret:
+    paypalrestsdk.configure({
+        "mode": paypal_mode,
+        "client_id": paypal_client_id,
+        "client_secret": paypal_client_secret
+    })
 
 # Database setup
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -40,7 +45,7 @@ async def sql(query: str, params: list = None):
         await conn.close()
 
 # Security
-SECRET_KEY = "your-secret-key-here-change-in-production"
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
@@ -50,14 +55,43 @@ security = HTTPBearer()
 
 app = FastAPI(title="E-commerce API", version="1.0.0")
 
-# CORS middleware
+# Updated CORS middleware for Vercel deployment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://v0-fastapi-e-commerce-app.vercel.app"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://localhost:3000",
+        "https://v0-fastapi-e-commerce-app.vercel.app",
+        "https://*.vercel.app",  # Allow all Vercel subdomains
+        "https://your-frontend-domain.vercel.app"  # Replace with your actual frontend domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add a health check endpoint for Vercel
+@app.get("/")
+async def root():
+    return {"message": "E-commerce API is running on Vercel!", "status": "healthy"}
+
+@app.get("/health")
+async def health_check():
+    try:
+        # Test database connection
+        result = await sql("SELECT 1 as test")
+        return {
+            "status": "healthy",
+            "database": "connected" if result else "disconnected",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
 # Enums
 class UserRole(str, Enum):
@@ -103,8 +137,8 @@ class CartItemCreate(BaseModel):
 
 class CheckoutRequest(BaseModel):
     payment_method: str = "paypal"
-    return_url: Optional[str] = "http://localhost:3000/payment/success"
-    cancel_url: Optional[str] = "http://localhost:3000/payment/cancel"
+    return_url: Optional[str] = "https://your-frontend-domain.vercel.app/payment/success"
+    cancel_url: Optional[str] = "https://your-frontend-domain.vercel.app/payment/cancel"
 
 class PayPalExecuteRequest(BaseModel):
     payment_id: str
@@ -549,7 +583,7 @@ async def create_payment(
     # Calculate total
     total_amount = sum(item["price"] * item["quantity"] for item in cart_items)
     
-    if checkout_data.payment_method == "paypal":
+    if checkout_data.payment_method == "paypal" and paypal_client_id:
         # Create PayPal payment
         items = []
         for item in cart_items:
@@ -786,6 +820,7 @@ async def update_order_status(
     
     return {"message": f"Order status updated to {status_update.status}"}
 
+# This is the entry point for Vercel
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
