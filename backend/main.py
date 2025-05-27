@@ -253,7 +253,12 @@ async def update_profile(
         param_count += 1
     
     if not update_fields:
-        return current_user
+        return {
+            "id": current_user["id"],
+            "email": current_user["email"],
+            "username": current_user["username"],
+            "role": current_user["role"]
+        }
     
     query = f"UPDATE users SET {', '.join(update_fields)} WHERE id = ${param_count} RETURNING *"
     params.append(current_user["id"])
@@ -461,6 +466,35 @@ async def add_to_cart(
         result = await sql(
             "INSERT INTO cart_items (user_id, product_id, quantity) VALUES ($1, $2, $3) RETURNING *",
             [current_user["id"], cart_item.product_id, cart_item.quantity]
+        )
+        return result[0]
+
+class CartItemUpdate(BaseModel):
+    quantity: int
+
+@app.put("/cart/items/{item_id}")
+async def update_cart_item(
+    item_id: int,
+    cart_update: CartItemUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    cart_item = await sql(
+        "SELECT * FROM cart_items WHERE id = $1 AND user_id = $2",
+        [item_id, current_user["id"]]
+    )
+    
+    if not cart_item:
+        raise HTTPException(status_code=404, detail="Cart item not found")
+    
+    if cart_update.quantity <= 0:
+        # Remove item if quantity is 0 or less
+        await sql("DELETE FROM cart_items WHERE id = $1", [item_id])
+        return {"message": "Item removed from cart"}
+    else:
+        # Update quantity
+        result = await sql(
+            "UPDATE cart_items SET quantity = $1 WHERE id = $2 RETURNING *",
+            [cart_update.quantity, item_id]
         )
         return result[0]
 

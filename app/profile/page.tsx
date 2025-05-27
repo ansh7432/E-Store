@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/auth-context"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,19 +26,21 @@ import {
   CheckCircle
 } from "lucide-react"
 
+interface OrderItem {
+  product_id: number
+  product_name: string
+  quantity: number
+  price: number
+  image_url?: string
+}
+
 interface Order {
   id: number
   total_amount: number
   status: string
   created_at: string
   item_count: number
-  items: Array<{
-    product_id: number
-    product_name: string
-    quantity: number
-    price: number
-    image_url?: string
-  }>
+  items: OrderItem[]
 }
 
 interface UserProfile {
@@ -49,8 +51,9 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user, logout, loading: authLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -58,6 +61,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [editingProfile, setEditingProfile] = useState(false)
   const [editingPassword, setEditingPassword] = useState(false)
+  
+  // Get initial tab from URL params
+  const initialTab = searchParams.get('tab') || 'profile'
   
   // Form states
   const [profileForm, setProfileForm] = useState({
@@ -72,50 +78,116 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
+    console.log('Profile page effect - user:', user, 'authLoading:', authLoading)
+    
+    // Wait for auth context to finish loading
+    if (authLoading) {
+      return
+    }
+
+    // If no user after auth is done loading, redirect to login
     if (!user) {
+      console.log('No user found, redirecting to login')
       router.push("/auth/login")
       return
     }
     
+    // If user exists, fetch profile and orders
+    console.log('User found, fetching profile and orders')
     fetchProfile()
     fetchOrders()
-  }, [user, router])
+  }, [user, authLoading, router])
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token")
+    console.log('Getting auth headers, token exists:', !!token)
+    
+    if (!token) {
+      console.log('No token found, redirecting to login')
+      router.push("/auth/login")
+      return null
+    }
+    return {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  }
 
   const fetchProfile = async () => {
     try {
+      console.log('Fetching profile...')
+      const headers = getAuthHeaders()
+      if (!headers) return
+
       const response = await fetch("http://localhost:8000/auth/me", {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        }
+        headers
       })
+      
+      console.log('Profile response status:', response.status)
       
       if (response.ok) {
         const userData = await response.json()
+        console.log('Profile data received:', userData)
         setProfile(userData)
         setProfileForm({
           username: userData.username,
           email: userData.email
         })
+      } else if (response.status === 401) {
+        console.log('Unauthorized, logging out')
+        logout()
+      } else {
+        console.error('Profile fetch failed with status:', response.status)
       }
     } catch (error) {
       console.error("Error fetching profile:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load profile",
+        variant: "destructive"
+      })
     }
   }
 
   const fetchOrders = async () => {
     try {
+      console.log('Fetching orders...')
+      const headers = getAuthHeaders()
+      if (!headers) return
+
       const response = await fetch("http://localhost:8000/orders", {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        }
+        headers
       })
+      
+      console.log('Orders response status:', response.status)
       
       if (response.ok) {
         const ordersData = await response.json()
-        setOrders(ordersData)
+        console.log('Orders data received:', ordersData)
+        
+        // Process the orders data to handle the items properly
+        const processedOrders = ordersData.map((order: any) => ({
+          ...order,
+          items: order.items || [],
+          item_count: order.item_count || order.items?.length || 0
+        }))
+        
+        setOrders(processedOrders)
+      } else if (response.status === 401) {
+        console.log('Unauthorized, logging out')
+        logout()
+      } else {
+        console.error('Orders fetch failed with status:', response.status)
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
       }
     } catch (error) {
       console.error("Error fetching orders:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load orders",
+        variant: "destructive"
+      })
     } finally {
       setLoading(false)
     }
@@ -123,12 +195,12 @@ export default function ProfilePage() {
 
   const updateProfile = async () => {
     try {
+      const headers = getAuthHeaders()
+      if (!headers) return
+
       const response = await fetch("http://localhost:8000/auth/profile", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
+        headers,
         body: JSON.stringify(profileForm)
       })
       
@@ -140,6 +212,8 @@ export default function ProfilePage() {
           title: "Success",
           description: "Profile updated successfully"
         })
+      } else if (response.status === 401) {
+        logout()
       } else {
         const error = await response.json()
         toast({
@@ -168,12 +242,12 @@ export default function ProfilePage() {
     }
 
     try {
+      const headers = getAuthHeaders()
+      if (!headers) return
+
       const response = await fetch("http://localhost:8000/auth/password", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
+        headers,
         body: JSON.stringify({
           current_password: passwordForm.current_password,
           new_password: passwordForm.new_password
@@ -191,6 +265,8 @@ export default function ProfilePage() {
           title: "Success",
           description: "Password updated successfully"
         })
+      } else if (response.status === 401) {
+        logout()
       } else {
         const error = await response.json()
         toast({
@@ -210,11 +286,12 @@ export default function ProfilePage() {
 
   const cancelOrder = async (orderId: number) => {
     try {
+      const headers = getAuthHeaders()
+      if (!headers) return
+
       const response = await fetch(`http://localhost:8000/orders/${orderId}/cancel`, {
         method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        }
+        headers
       })
       
       if (response.ok) {
@@ -223,6 +300,8 @@ export default function ProfilePage() {
           description: "Order cancelled successfully"
         })
         fetchOrders() // Refresh orders
+      } else if (response.status === 401) {
+        logout()
       } else {
         const error = await response.json()
         toast({
@@ -251,12 +330,31 @@ export default function ProfilePage() {
     }
   }
 
+  // Show loading spinner while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading spinner while fetching profile data
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p className="text-gray-600">Loading profile...</p>
+          </div>
         </div>
       </div>
     )
@@ -273,7 +371,7 @@ export default function ProfilePage() {
           <p className="text-gray-600 mt-2">Manage your account settings and view your orders</p>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs defaultValue={initialTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile">Profile Settings</TabsTrigger>
             <TabsTrigger value="orders">Order History</TabsTrigger>
@@ -480,7 +578,17 @@ export default function ProfilePage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             {order.items.slice(0, 3).map((item, index) => (
                               <div key={index} className="flex items-center gap-2 text-sm">
-                                <div className="w-8 h-8 bg-gray-100 rounded"></div>
+                                <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                                  {item.image_url ? (
+                                    <img 
+                                      src={item.image_url} 
+                                      alt={item.product_name}
+                                      className="w-full h-full object-cover rounded"
+                                    />
+                                  ) : (
+                                    <Package className="w-4 h-4 text-gray-400" />
+                                  )}
+                                </div>
                                 <div>
                                   <div className="font-medium">{item.product_name}</div>
                                   <div className="text-gray-500">Qty: {item.quantity}</div>
