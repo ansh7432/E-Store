@@ -53,7 +53,7 @@ A complete e-commerce solution built with FastAPI backend and Next.js frontend.
    \`\`\`bash
    python main.py
    \`\`\`
-   The API will be available at `http://localhost:8000`
+   The API will be available at `https://e-store-tau-sooty.vercel.app`
 
 ### Frontend Setup
 1. Install Node.js dependencies:

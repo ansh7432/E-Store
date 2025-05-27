@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Verify token and get user info
-      const response = await fetch("http://localhost:8000/auth/me", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserInfo = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:8000/auth/me", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Attempting login for:", email)
       
-      const response = await fetch("http://localhost:8000/auth/token", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -166,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Attempting signup for:", email)
       
-      const response = await fetch("http://localhost:8000/auth/signup", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

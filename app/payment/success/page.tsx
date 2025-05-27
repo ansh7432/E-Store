@@ -46,7 +46,7 @@ export default function PaymentSuccessPage() {
         return
       }
 
-      const response = await fetch("http://localhost:8000/payment/execute", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/payment/execute", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 export async function GET() {
   try {
     // Test the backend connection
-    const response = await fetch("http://localhost:8000/products")
+    const response = await fetch("https://e-store-tau-sooty.vercel.app/products")
     const data = await response.json()
 
     return NextResponse.json({

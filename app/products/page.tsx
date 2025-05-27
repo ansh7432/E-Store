@@ -39,7 +39,7 @@ export default function ProductsPage() {
       if (search) params.append("search", search)
       if (category && category !== "all") params.append("category", category)
 
-      const response = await fetch(`http://localhost:8000/products?${params}`)
+      const response = await fetch(`https://e-store-tau-sooty.vercel.app/products?${params}`)
       if (response.ok) {
         const data = await response.json()
         setProducts(data.products || [])

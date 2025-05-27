@@ -40,7 +40,7 @@ export default function CartPage() {
         return
       }
 
-      const response = await fetch("http://localhost:8000/checkout", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -75,7 +75,7 @@ export default function OrderDetailsPage() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch(`http://localhost:8000/orders/${params.id}`, {
+      const response = await fetch(`https://e-store-tau-sooty.vercel.app/orders/${params.id}`, {
         headers
       })
       
@@ -120,7 +120,7 @@ export default function OrderDetailsPage() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch(`http://localhost:8000/orders/${params.id}/cancel`, {
+      const response = await fetch(`https://e-store-tau-sooty.vercel.app/orders/${params.id}/cancel`, {
         method: "PUT",
         headers
       })

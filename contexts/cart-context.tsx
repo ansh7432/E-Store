@@ -73,7 +73,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.log('Fetching cart...')
       const headers = getAuthHeaders()
       
-      const response = await fetch("http://localhost:8000/cart", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/cart", {
         headers
       })
 
@@ -116,7 +116,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.log('Adding to cart:', { productId, quantity })
       const headers = getAuthHeaders()
 
-      const response = await fetch("http://localhost:8000/cart/items", {
+      const response = await fetch("https://e-store-tau-sooty.vercel.app/cart/items", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -160,7 +160,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.log('Removing from cart:', itemId)
       const headers = getAuthHeaders()
 
-      const response = await fetch(`http://localhost:8000/cart/items/${itemId}`, {
+      const response = await fetch(`https://e-store-tau-sooty.vercel.app/cart/items/${itemId}`, {
         method: "DELETE",
         headers
       })
@@ -196,7 +196,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.log('Updating cart quantity:', { itemId, quantity })
       const headers = getAuthHeaders()
 
-      const response = await fetch(`http://localhost:8000/cart/items/${itemId}`, {
+      const response = await fetch(`https://e-store-tau-sooty.vercel.app/cart/items/${itemId}`, {
         method: "PUT",
         headers,
         body: JSON.stringify({ quantity })
