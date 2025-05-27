@@ -103,7 +103,7 @@ export default function VendorProductsPage() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/products", {
+      const response = await fetch("api/products", {
         headers: {
           "Authorization": headers.Authorization
         }
@@ -152,8 +152,8 @@ export default function VendorProductsPage() {
       if (!headers) return
 
       const url = editingProduct
-        ? `https://e-store-tau-sooty.vercel.app/vendor/products/${editingProduct.id}`
-        : "https://e-store-tau-sooty.vercel.app/vendor/products"
+        ? `api/vendor/products/${editingProduct.id}`
+        : "api/vendor/products"
 
       const method = editingProduct ? "PUT" : "POST"
 
@@ -212,7 +212,7 @@ export default function VendorProductsPage() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch(`https://e-store-tau-sooty.vercel.app/vendor/products/${productId}`, {
+      const response = await fetch(`api/vendor/products/${productId}`, {
         method: "DELETE",
         headers: {
           "Authorization": headers.Authorization

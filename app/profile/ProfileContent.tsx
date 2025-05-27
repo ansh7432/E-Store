@@ -123,7 +123,7 @@ export default function ProfileContent() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/me", {
+      const response = await fetch("api/auth/me", {
         headers
       })
       
@@ -162,7 +162,7 @@ export default function ProfileContent() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/orders", {
+      const response = await fetch("api/orders", {
         headers
       })
       
@@ -205,7 +205,7 @@ export default function ProfileContent() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/profile", {
+      const response = await fetch("api/auth/profile", {
         method: "PUT",
         headers,
         body: JSON.stringify(profileForm)
@@ -252,7 +252,7 @@ export default function ProfileContent() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/password", {
+      const response = await fetch("api/auth/password", {
         method: "PUT",
         headers,
         body: JSON.stringify({
@@ -296,7 +296,7 @@ export default function ProfileContent() {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch(`https://e-store-tau-sooty.vercel.app/orders/${orderId}/cancel`, {
+      const response = await fetch(`api/orders/${orderId}/cancel`, {
         method: "PUT",
         headers
       })

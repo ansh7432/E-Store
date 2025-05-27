@@ -1,3 +1,4 @@
+// contexts/auth-context.tsx
 "use client"
 
 import type React from "react"
@@ -44,8 +45,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      // Verify token and get user info
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/me", {
+      // Verify token and get user info using proxy route
+      const response = await fetch("/api/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserInfo = async (token: string) => {
     try {
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/me", {
+      const response = await fetch("/api/auth/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -115,7 +116,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Attempting login for:", email)
       
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/token", {
+      // Use proxy route instead of direct backend call
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!response.ok) {
         const errorData = await response.json()
         console.error("Login error:", errorData)
-        throw new Error(errorData.detail || "Login failed")
+        throw new Error(errorData.detail || errorData.error || "Login failed")
       }
 
       const data = await response.json()
@@ -166,7 +168,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Attempting signup for:", email)
       
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/auth/signup", {
+      // Use proxy route instead of direct backend call
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -179,7 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!response.ok) {
         const errorData = await response.json()
         console.error("Signup error:", errorData)
-        throw new Error(errorData.detail || "Signup failed")
+        throw new Error(errorData.detail || errorData.error || "Signup failed")
       }
 
       toast({

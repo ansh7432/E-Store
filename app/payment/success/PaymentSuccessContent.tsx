@@ -46,7 +46,7 @@ export default function PaymentSuccessContent() {
         return
       }
 
-      const response = await fetch("https://e-store-tau-sooty.vercel.app/payment/execute", {
+      const response = await fetch("api/payment/execute", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

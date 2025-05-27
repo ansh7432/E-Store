@@ -1,23 +1,25 @@
+// app/orders/[id]/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
 import { useAuth } from "@/contexts/auth-context"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { Navbar } from "@/components/navbar"
 import { 
-  ArrowLeft, 
+  ArrowLeft,
   Package, 
-  Calendar, 
-  DollarSign, 
+  Calendar,
+  DollarSign,
+  MapPin,
   CreditCard,
-  XCircle,
-  CheckCircle
+  User,
+  XCircle
 } from "lucide-react"
+import Image from "next/image"
 
 interface OrderItem {
   id: number
@@ -37,25 +39,41 @@ interface OrderDetails {
   items: OrderItem[]
 }
 
-export default function OrderDetailsPage() {
-  const params = useParams()
+// Fix the params type for Next.js 15
+export default function OrderDetailsPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { user, logout } = useAuth()
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
   const { toast } = useToast()
   
   const [order, setOrder] = useState<OrderDetails | null>(null)
   const [loading, setLoading] = useState(true)
+  const [cancelling, setCancelling] = useState(false)
+  const [orderId, setOrderId] = useState<string>("")
 
   useEffect(() => {
-    if (authLoading) return
+    // Resolve params first
+    const resolveParams = async () => {
+      const resolvedParams = await params
+      setOrderId(resolvedParams.id)
+    }
     
+    resolveParams()
+  }, [params])
+
+  useEffect(() => {
     if (!user) {
       router.push("/auth/login")
       return
     }
     
-    fetchOrderDetails()
-  }, [user, authLoading, params.id])
+    if (orderId) {
+      fetchOrderDetails()
+    }
+  }, [user, orderId])
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token")
@@ -71,11 +89,12 @@ export default function OrderDetailsPage() {
 
   const fetchOrderDetails = async () => {
     try {
-      console.log('Fetching order details for ID:', params.id)
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch(`https://e-store-tau-sooty.vercel.app/orders/${params.id}`, {
+      console.log(`Fetching order details for order ID: ${orderId}`)
+      
+      const response = await fetch(`/api/orders/${orderId}`, {
         headers
       })
       
@@ -86,25 +105,24 @@ export default function OrderDetailsPage() {
         console.log('Order details received:', orderData)
         setOrder(orderData)
       } else if (response.status === 401) {
-        router.push("/auth/login")
+        logout()
       } else if (response.status === 404) {
         toast({
-          title: "Error",
-          description: "Order not found",
+          title: "Order not found",
+          description: "The order you're looking for doesn't exist or you don't have permission to view it.",
           variant: "destructive"
         })
         router.push("/profile?tab=orders")
       } else {
-        const errorText = await response.text()
-        console.error('Order fetch error:', errorText)
+        const errorData = await response.json().catch(() => ({}))
         toast({
           title: "Error",
-          description: "Failed to load order details",
+          description: errorData.detail || "Failed to load order details",
           variant: "destructive"
         })
       }
     } catch (error) {
-      console.error("Error fetching order:", error)
+      console.error("Error fetching order details:", error)
       toast({
         title: "Error",
         description: "Failed to load order details",
@@ -116,11 +134,14 @@ export default function OrderDetailsPage() {
   }
 
   const cancelOrder = async () => {
+    if (!order) return
+    
+    setCancelling(true)
     try {
       const headers = getAuthHeaders()
       if (!headers) return
 
-      const response = await fetch(`https://e-store-tau-sooty.vercel.app/orders/${params.id}/cancel`, {
+      const response = await fetch(`/api/orders/${order.id}/cancel`, {
         method: "PUT",
         headers
       })
@@ -130,14 +151,15 @@ export default function OrderDetailsPage() {
           title: "Success",
           description: "Order cancelled successfully"
         })
-        fetchOrderDetails() // Refresh order details
+        // Refresh order details
+        fetchOrderDetails()
       } else if (response.status === 401) {
-        router.push("/auth/login")
+        logout()
       } else {
         const error = await response.json()
         toast({
           title: "Error",
-          description: error.detail,
+          description: error.detail || "Failed to cancel order",
           variant: "destructive"
         })
       }
@@ -147,6 +169,8 @@ export default function OrderDetailsPage() {
         description: "Failed to cancel order",
         variant: "destructive"
       })
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -161,18 +185,18 @@ export default function OrderDetailsPage() {
     }
   }
 
-  const getStatusIcon = (status: string) => {
+  const getStatusText = (status: string) => {
     switch (status.toLowerCase()) {
-      case "delivered":
-        return <CheckCircle className="w-4 h-4" />
-      case "cancelled":
-        return <XCircle className="w-4 h-4" />
-      default:
-        return <Package className="w-4 h-4" />
+      case "created": return "Order Placed"
+      case "confirmed": return "Confirmed"
+      case "shipped": return "Shipped"
+      case "delivered": return "Delivered"
+      case "cancelled": return "Cancelled"
+      default: return status
     }
   }
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
         <Navbar />
@@ -191,10 +215,10 @@ export default function OrderDetailsPage() {
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
+          <div className="text-center py-12">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">Order Not Found</h1>
-            <p className="text-gray-600 mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
+            <h2 className="text-2xl font-semibold text-gray-600 mb-2">Order Not Found</h2>
+            <p className="text-gray-500 mb-4">The order you're looking for doesn't exist.</p>
             <Button onClick={() => router.push("/profile?tab=orders")}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Orders
@@ -209,74 +233,84 @@ export default function OrderDetailsPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Button variant="ghost" onClick={() => router.push("/profile?tab=orders")} className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Orders
-          </Button>
-          
-          <div className="flex justify-between items-start">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => router.push("/profile?tab=orders")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Orders
+            </Button>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Order #{order.id}
               </h1>
-              <p className="text-gray-600 mt-2">Order details and tracking information</p>
+              <p className="text-gray-600 mt-1">Order details and tracking information</p>
             </div>
-            
-            {order.status === "created" && (
-              <Button variant="destructive" onClick={cancelOrder}>
-                <XCircle className="w-4 h-4 mr-2" />
-                Cancel Order
-              </Button>
-            )}
           </div>
+          
+          {order.status === "created" && (
+            <Button 
+              variant="destructive" 
+              onClick={cancelOrder}
+              disabled={cancelling}
+            >
+              {cancelling ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <XCircle className="w-4 h-4 mr-2" />
+              )}
+              Cancel Order
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Order Summary */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Order Status */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  Order Information
+                <CardTitle className="flex items-center justify-between">
+                  <span>Order Status</span>
+                  <Badge className={getStatusColor(order.status) + " text-white"}>
+                    {getStatusText(order.status)}
+                  </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <div>
-                      <div className="text-sm text-gray-500">Order Date</div>
-                      <div className="font-medium">{new Date(order.created_at).toLocaleString()}</div>
+                      <div className="font-medium">Order Date</div>
+                      <div className="text-gray-600">
+                        {new Date(order.created_at).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
-                  
                   <div className="flex items-center gap-2">
-                    <div className={`p-1 rounded text-white ${getStatusColor(order.status)}`}>
-                      {getStatusIcon(order.status)}
-                    </div>
+                    <Package className="w-4 h-4 text-gray-500" />
                     <div>
-                      <div className="text-sm text-gray-500">Status</div>
-                      <Badge className={getStatusColor(order.status) + " text-white capitalize"}>
-                        {order.status}
-                      </Badge>
+                      <div className="font-medium">Items</div>
+                      <div className="text-gray-600">{order.items.length} items</div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-gray-500" />
-                    <div>
-                      <div className="text-sm text-gray-500">Payment ID</div>
-                      <div className="font-medium text-sm">{order.payment_intent_id}</div>
-                    </div>
-                  </div>
-                  
                   <div className="flex items-center gap-2">
                     <DollarSign className="w-4 h-4 text-gray-500" />
                     <div>
-                      <div className="text-sm text-gray-500">Total Amount</div>
-                      <div className="font-bold text-lg">${order.total_amount.toFixed(2)}</div>
+                      <div className="font-medium">Total</div>
+                      <div className="text-gray-600">${order.total_amount.toFixed(2)}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <div className="font-medium">Payment ID</div>
+                      <div className="text-gray-600 text-xs">{order.payment_intent_id}</div>
                     </div>
                   </div>
                 </div>
@@ -286,116 +320,81 @@ export default function OrderDetailsPage() {
             {/* Order Items */}
             <Card>
               <CardHeader>
-                <CardTitle>Order Items ({order.items?.length || 0})</CardTitle>
+                <CardTitle>Order Items</CardTitle>
+                <CardDescription>Items in this order</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {order.items?.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 relative">
+                  {order.items.map((item, index) => (
+                    <div key={item.id || index} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                         {item.image_url ? (
-                          <Image 
-                            src={item.image_url} 
+                          <Image
+                            src={item.image_url}
                             alt={item.product_name}
-                            fill
-                            className="object-cover rounded-lg"
+                            width={64}
+                            height={64}
+                            className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package className="w-6 h-6 text-gray-400" />
-                          </div>
+                          <Package className="w-8 h-8 text-gray-400" />
                         )}
                       </div>
-                      
                       <div className="flex-1">
-                        <h3 className="font-medium">{item.product_name}</h3>
+                        <h3 className="font-semibold">{item.product_name}</h3>
                         <div className="text-sm text-gray-600">
-                          Quantity: {item.quantity}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Price: ${item.price.toFixed(2)} each
+                          Product ID: {item.product_id}
                         </div>
                       </div>
-                      
                       <div className="text-right">
-                        <div className="font-bold">
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </div>
+                        <div className="font-semibold">${item.price.toFixed(2)}</div>
+                        <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
+                      </div>
+                      <div className="text-right font-semibold">
+                        ${(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   ))}
                 </div>
-                
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex justify-between items-center text-lg font-bold">
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Order Summary Sidebar */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  {order.items.map((item, index) => (
+                    <div key={item.id || index} className="flex justify-between text-sm">
+                      <span>{item.product_name} (x{item.quantity})</span>
+                      <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t pt-2">
+                  <div className="flex justify-between font-semibold">
                     <span>Total</span>
                     <span>${order.total_amount.toFixed(2)}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Order Timeline */}
-          <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Order Timeline</CardTitle>
+                <CardTitle>Need Help?</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <div>
-                      <div className="font-medium">Order Placed</div>
-                      <div className="text-sm text-gray-600">
-                        {new Date(order.created_at).toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {order.status === "cancelled" ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div>
-                        <div className="font-medium">Order Cancelled</div>
-                        <div className="text-sm text-gray-600">Order has been cancelled</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${order.status !== "created" ? "bg-green-500" : "bg-gray-300"}`}></div>
-                        <div>
-                          <div className="font-medium">Order Confirmed</div>
-                          <div className="text-sm text-gray-600">
-                            {order.status !== "created" ? "Confirmed" : "Pending confirmation"}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${["shipped", "delivered"].includes(order.status) ? "bg-purple-500" : "bg-gray-300"}`}></div>
-                        <div>
-                          <div className="font-medium">Order Shipped</div>
-                          <div className="text-sm text-gray-600">
-                            {["shipped", "delivered"].includes(order.status) ? "Shipped" : "Pending shipment"}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${order.status === "delivered" ? "bg-emerald-500" : "bg-gray-300"}`}></div>
-                        <div>
-                          <div className="font-medium">Order Delivered</div>
-                          <div className="text-sm text-gray-600">
-                            {order.status === "delivered" ? "Delivered" : "Pending delivery"}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  If you have any questions about your order, please contact our support team.
+                </p>
+                <Button variant="outline" className="w-full">
+                  Contact Support
+                </Button>
               </CardContent>
             </Card>
           </div>
