@@ -95,6 +95,14 @@ class CartItemCreate(BaseModel):
 class CheckoutRequest(BaseModel):
     payment_method: str = "card"
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
+
 # Auth utilities
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -218,6 +226,61 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
         "username": current_user["username"],
         "role": current_user["role"]
     }
+
+@app.put("/auth/profile")
+async def update_profile(
+    user_update: UserUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    update_fields = []
+    params = []
+    param_count = 1
+    
+    for field, value in user_update.dict(exclude_unset=True).items():
+        if field == "email":
+            # Check if email already exists
+            existing_email = await sql("SELECT id FROM users WHERE email = $1 AND id != $2", [value, current_user["id"]])
+            if existing_email:
+                raise HTTPException(status_code=400, detail="Email already registered")
+        elif field == "username":
+            # Check if username already exists
+            existing_username = await sql("SELECT id FROM users WHERE username = $1 AND id != $2", [value, current_user["id"]])
+            if existing_username:
+                raise HTTPException(status_code=400, detail="Username already taken")
+        
+        update_fields.append(f"{field} = ${param_count}")
+        params.append(value)
+        param_count += 1
+    
+    if not update_fields:
+        return current_user
+    
+    query = f"UPDATE users SET {', '.join(update_fields)} WHERE id = ${param_count} RETURNING *"
+    params.append(current_user["id"])
+    
+    result = await sql(query, params)
+    return {
+        "id": result[0]["id"],
+        "email": result[0]["email"],
+        "username": result[0]["username"],
+        "role": result[0]["role"]
+    }
+
+@app.put("/auth/password")
+async def update_password(
+    password_update: PasswordUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    # Verify current password
+    if not verify_password(password_update.current_password, current_user["hashed_password"]):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+    
+    # Hash new password
+    new_hashed_password = get_password_hash(password_update.new_password)
+    
+    await sql("UPDATE users SET hashed_password = $1 WHERE id = $2", [new_hashed_password, current_user["id"]])
+    
+    return {"message": "Password updated successfully"}
 
 # Product endpoints
 @app.get("/products")
@@ -459,6 +522,82 @@ async def checkout(
         "payment_intent_id": order["payment_intent_id"],
         "status": "created"
     }
+
+# Order management endpoints
+@app.get("/orders")
+async def get_user_orders(
+    current_user: dict = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 20
+):
+    orders = await sql("""
+        SELECT o.*, 
+               COUNT(oi.id) as item_count,
+               ARRAY_AGG(
+                   JSON_BUILD_OBJECT(
+                       'product_id', oi.product_id,
+                       'product_name', p.name,
+                       'quantity', oi.quantity,
+                       'price', oi.price,
+                       'image_url', p.image_url
+                   )
+               ) as items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE o.user_id = $1
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+        LIMIT $2 OFFSET $3
+    """, [current_user["id"], limit, skip])
+    
+    return orders
+
+@app.get("/orders/{order_id}")
+async def get_order_details(
+    order_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    order = await sql("""
+        SELECT o.*, 
+               ARRAY_AGG(
+                   JSON_BUILD_OBJECT(
+                       'id', oi.id,
+                       'product_id', oi.product_id,
+                       'product_name', p.name,
+                       'quantity', oi.quantity,
+                       'price', oi.price,
+                       'image_url', p.image_url
+                   )
+               ) as items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE o.id = $1 AND o.user_id = $2
+        GROUP BY o.id
+    """, [order_id, current_user["id"]])
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    return order[0]
+
+@app.put("/orders/{order_id}/cancel")
+async def cancel_order(
+    order_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    order = await sql("SELECT * FROM orders WHERE id = $1 AND user_id = $2", [order_id, current_user["id"]])
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order[0]["status"] != "created":
+        raise HTTPException(status_code=400, detail="Cannot cancel order that is not in created status")
+    
+    await sql("UPDATE orders SET status = 'cancelled' WHERE id = $1", [order_id])
+    
+    return {"message": "Order cancelled successfully"}
 
 if __name__ == "__main__":
     import uvicorn

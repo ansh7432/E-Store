@@ -47,7 +47,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 relative overflow-hidden">
       {/* Animated Background Elements */}
-      <div className="fixed inset-0 -z-10">
+      <div className="fixed inset-0 -z-50">
         <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-40 right-20 w-80 h-80 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-20 left-1/3 w-72 h-72 bg-gradient-to-r from-orange-400/30 to-red-400/30 rounded-full blur-3xl animate-pulse delay-2000"></div>
@@ -55,7 +55,7 @@ export default function LoginPage() {
       </div>
 
       {/* Floating Particles */}
-      <div className="fixed inset-0 -z-5">
+      <div className="fixed inset-0 -z-40">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -72,7 +72,7 @@ export default function LoginPage() {
 
       <Navbar />
 
-      <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[calc(100vh-4rem)]">
+      <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[calc(100vh-4rem)] relative z-10">
         <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Branding */}
           <div className="hidden lg:block">
@@ -105,13 +105,13 @@ export default function LoginPage() {
 
           {/* Right Side - Login Form */}
           <div className="flex justify-center lg:justify-end">
-            <Card className="w-full max-w-md relative overflow-hidden border-0 shadow-2xl shadow-purple-500/20 bg-white/80 backdrop-blur-xl">
+            <Card className="w-full max-w-md relative overflow-hidden border-0 shadow-2xl shadow-purple-500/20 bg-white/90 backdrop-blur-xl">
               {/* Card Background Effects */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-white/70"></div>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(147,51,234,0.1)_0%,transparent_50%)]"></div>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.1)_0%,transparent_50%)]"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/95 to-white/85"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(147,51,234,0.08)_0%,transparent_50%)]"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.08)_0%,transparent_50%)]"></div>
               
-              <CardHeader className="relative z-10 text-center pb-8">
+              <CardHeader className="relative z-10 text-center pb-6">
                 <div className="mx-auto mb-4 p-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl w-fit shadow-lg">
                   <ShoppingBag className="h-8 w-8 text-white" />
                 </div>
@@ -119,24 +119,23 @@ export default function LoginPage() {
                   Welcome Back
                 </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Sign in to access your account and continue shopping
+                  Sign in to your account
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="relative z-10 space-y-6">
-                <form onSubmit={handleSubmit} className="space-y-6">
+              <CardContent className="relative z-10 space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors z-10" />
                       <Input 
                         id="email" 
                         type="email" 
                         value={email} 
                         onChange={(e) => setEmail(e.target.value)} 
                         required 
-                        placeholder="Enter your email"
-                        className="pl-12 h-12 border-2 border-gray-200 focus:border-purple-500 rounded-xl bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/70 focus:bg-white/90"
+                        className="pl-14 h-12 border-2 border-gray-200 focus:border-purple-500 rounded-xl bg-white/80 backdrop-blur-sm transition-all duration-300 hover:bg-white/90 focus:bg-white text-gray-700 shadow-sm"
                       />
                     </div>
                   </div>
@@ -144,40 +143,42 @@ export default function LoginPage() {
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                     <div className="relative group">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors z-10" />
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        required
-                        placeholder="Enter your password"
-                        className="pl-12 pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 rounded-xl bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/70 focus:bg-white/90"
+                        required 
+                        className="pl-14 pr-14 h-12 border-2 border-gray-200 focus:border-purple-500 rounded-xl bg-white/80 backdrop-blur-sm transition-all duration-300 hover:bg-white/90 focus:bg-white text-gray-700 shadow-sm"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors z-10"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                   </div>
 
-                  <Button 
+                    <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:shadow-purple-500/25 transform hover:scale-105 transition-all duration-300 group" 
+                    className="w-full h-12 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-xl hover:shadow-2xl hover:shadow-gray-900/50 transform hover:scale-[1.02] transition-all duration-300 group border-0 text-base relative overflow-hidden" 
                     disabled={loading}
                   >
+                    {/* Hover gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-800/0 via-gray-700/20 to-gray-800/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
                     {loading ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-3 relative z-10">
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        Signing In...
+                        <span className="font-semibold text-white">Signing In...</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        Sign In
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      <div className="flex items-center justify-center gap-3 relative z-10">
+                        <span className="font-semibold text-white group-hover:text-gray-100 transition-colors duration-300">Sign In</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300 text-white group-hover:text-gray-100" />
                       </div>
                     )}
                   </Button>
@@ -185,19 +186,19 @@ export default function LoginPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200"></div>
+                    <div className="w-full border-t border-gray-300"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white/80 text-gray-500">or</span>
+                    <span className="px-3 bg-white text-gray-500 font-medium">or</span>
                   </div>
                 </div>
 
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-3">
                   <p className="text-sm text-gray-600">
                     Don't have an account?{" "}
                     <Link 
                       href="/auth/signup" 
-                      className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                      className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
                     >
                       Create Account
                     </Link>
@@ -205,7 +206,7 @@ export default function LoginPage() {
                   
                   <Link 
                     href="/auth/forgot-password" 
-                    className="text-sm text-gray-500 hover:text-purple-600 transition-colors duration-300"
+                    className="text-sm text-gray-500 hover:text-purple-600 transition-colors duration-300 font-medium block"
                   >
                     Forgot your password?
                   </Link>
@@ -214,17 +215,6 @@ export default function LoginPage() {
             </Card>
           </div>
         </div>
-      </div>
-
-      {/* Mobile-only branding */}
-      <div className="lg:hidden text-center py-8">
-        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30 mb-4">
-          <Sparkles className="w-4 h-4 text-purple-600" />
-          <span className="text-purple-700 font-medium">E-Store Login</span>
-        </div>
-        <p className="text-gray-600 max-w-sm mx-auto">
-          Access your account to continue your amazing shopping experience
-        </p>
       </div>
 
       <style jsx global>{`
