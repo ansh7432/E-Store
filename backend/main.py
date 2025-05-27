@@ -63,7 +63,7 @@ app.add_middleware(
         "https://localhost:3000",
         "https://v0-fastapi-e-commerce-app.vercel.app",
         "https://*.vercel.app",  # Allow all Vercel subdomains
-        "https://your-frontend-domain.vercel.app"  # Replace with your actual frontend domain
+        "https://kommercio.netlify.app/"  # Replace with your actual frontend domain
     ],
     allow_credentials=True,
     allow_methods=["*"],
