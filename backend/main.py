@@ -61,14 +61,19 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://localhost:3000",
-        "https://v0-fastapi-e-commerce-app.vercel.app",
-        "https://*.vercel.app",  # Allow all Vercel subdomains
-        "https://kommercio.netlify.app/"  # Replace with your actual frontend domain
+        "https://kommercio.netlify.app",  # Remove the trailing slash
+        "https://www.kommercio.netlify.app",  # Add www version
+        "*"  # Temporarily allow all origins for debugging
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Add explicit OPTIONS handler for preflight requests
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    return {"message": "OK"}
 
 # Add a health check endpoint for Vercel
 @app.get("/")
