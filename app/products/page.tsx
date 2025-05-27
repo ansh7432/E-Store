@@ -1,3 +1,4 @@
+// app/products/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -39,16 +40,44 @@ export default function ProductsPage() {
       if (search) params.append("search", search)
       if (category && category !== "all") params.append("category", category)
 
-      const response = await fetch(`https://e-store-tau-sooty.vercel.app/products?${params}`)
+      // Use the API proxy instead of direct backend call
+      const url = params.toString() ? `/api/products?${params}` : '/api/products'
+      console.log('Fetching products from proxy:', url)
+
+      const response = await fetch(url)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('Products data received:', data)
         setProducts(data.products || [])
+        
+        if (data.error) {
+          console.warn('API returned error:', data.error)
+          toast({
+            title: "Warning",
+            description: data.error,
+            variant: "destructive",
+          })
+        }
       } else {
-        console.error("Failed to fetch products")
+        console.error("Failed to fetch products, status:", response.status)
+        const errorData = await response.json().catch(() => ({}))
+        console.error("Error response:", errorData)
+        
+        toast({
+          title: "Error",
+          description: "Failed to load products",
+          variant: "destructive",
+        })
         setProducts([])
       }
     } catch (error) {
       console.error("Error fetching products:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load products",
+        variant: "destructive",
+      })
       setProducts([])
     } finally {
       setLoading(false)
@@ -118,7 +147,10 @@ export default function ProductsPage() {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="text-center py-12">Loading products...</div>
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p>Loading products...</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (

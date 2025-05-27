@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -59,50 +58,46 @@ app = FastAPI(title="E-commerce API", version="1.0.0")
 # Updated CORS middleware for Vercel deployment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for now
-    allow_credentials=False,  # Set to False when using "*"
+    allow_origins=[
+        "http://localhost:3000",
+        "https://localhost:3000",
+         "https://localhost:3001",
+        "https://kommercio.netlify.app",  # Remove the trailing slash
+        "https://www.kommercio.netlify.app",  # Add www version
+        "*"  # Temporarily allow all origins for debugging
+    ],
+    allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
-# Custom response function with explicit CORS headers
-def create_cors_response(content, status_code=200):
-    response = JSONResponse(content=content, status_code=status_code)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
-    return response
-
 # Add explicit OPTIONS handler for preflight requests
 @app.options("/{path:path}")
 async def options_handler(path: str):
-    return create_cors_response({"message": "OK"})
+    return {"message": "OK"}
 
 # Add a health check endpoint for Vercel
 @app.get("/")
 async def root():
-    content = {"message": "E-commerce API is running on Vercel!", "status": "healthy"}
-    return create_cors_response(content)
+    return {"message": "E-commerce API is running on Vercel!", "status": "healthy"}
 
 @app.get("/health")
 async def health_check():
     try:
         # Test database connection
         result = await sql("SELECT 1 as test")
-        content = {
+        return {
             "status": "healthy",
             "database": "connected" if result else "disconnected",
             "timestamp": datetime.utcnow().isoformat()
         }
-        return create_cors_response(content)
     except Exception as e:
-        content = {
+        return {
             "status": "unhealthy",
             "database": "disconnected",
             "error": str(e),
             "timestamp": datetime.utcnow().isoformat()
         }
-        return create_cors_response(content, 500)
 
 # Enums
 class UserRole(str, Enum):
@@ -389,14 +384,12 @@ async def get_products(
     total_result = await sql(count_query, count_params)
     total = total_result[0]["total"] if total_result else 0
     
-    content = {
+    return {
         "products": products,
         "total": total,
         "skip": skip,
         "limit": limit
     }
-    
-    return create_cors_response(content)
 
 @app.get("/products/{product_id}")
 async def get_product(product_id: int):
