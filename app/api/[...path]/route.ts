@@ -88,7 +88,7 @@ async function handleRequest(
     return NextResponse.json(
       { 
         error: 'Proxy request failed', 
-        details: error.message,
+        details: error instanceof Error ? error.message : String(error),
         path: params.path?.join('/') || 'unknown'
       },
       { 

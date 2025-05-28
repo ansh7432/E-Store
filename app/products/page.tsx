@@ -8,11 +8,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/contexts/cart-context"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { Navbar } from "@/components/navbar"
-import { Search, ShoppingCart } from "lucide-react"
+import { 
+  Search, 
+  ShoppingCart, 
+  Filter, 
+  Grid3X3, 
+  List, 
+  Star,
+  Heart,
+  Eye,
+  Package
+} from "lucide-react"
 
 interface Product {
   id: number
@@ -22,6 +33,9 @@ interface Product {
   category: string
   image_url?: string
   stock: number
+  rating?: number
+  reviews_count?: number
+  is_featured?: boolean
 }
 
 export default function ProductsPage() {
@@ -29,6 +43,9 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("")
+  const [sortBy, setSortBy] = useState("newest")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [favorites, setFavorites] = useState<number[]>([])
   const { addToCart } = useCart()
   const { user } = useAuth()
   const { toast } = useToast()
@@ -39,8 +56,8 @@ export default function ProductsPage() {
       const params = new URLSearchParams()
       if (search) params.append("search", search)
       if (category && category !== "all") params.append("category", category)
+      if (sortBy && sortBy !== "newest") params.append("sort", sortBy)
 
-      // Use the API proxy instead of direct backend call
       const url = params.toString() ? `/api/products?${params}` : '/api/products'
       console.log('Fetching products from proxy:', url)
 
@@ -49,7 +66,11 @@ export default function ProductsPage() {
       if (response.ok) {
         const data = await response.json()
         console.log('Products data received:', data)
-        setProducts(data.products || [])
+        let productList = data.products || []
+        
+        // Client-side sorting if backend doesn't handle it
+        productList = sortProducts(productList, sortBy)
+        setProducts(productList)
         
         if (data.error) {
           console.warn('API returned error:', data.error)
@@ -84,9 +105,25 @@ export default function ProductsPage() {
     }
   }
 
+  const sortProducts = (productList: Product[], sortType: string) => {
+    const sorted = [...productList]
+    switch (sortType) {
+      case "price-low":
+        return sorted.sort((a, b) => a.price - b.price)
+      case "price-high":
+        return sorted.sort((a, b) => b.price - a.price)
+      case "name":
+        return sorted.sort((a, b) => a.name.localeCompare(b.name))
+      case "rating":
+        return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      default:
+        return sorted
+    }
+  }
+
   useEffect(() => {
     fetchProducts()
-  }, [search, category])
+  }, [search, category, sortBy])
 
   const handleAddToCart = async (productId: number) => {
     if (!user) {
@@ -113,84 +150,337 @@ export default function ProductsPage() {
     }
   }
 
+  const toggleFavorite = (productId: number) => {
+    setFavorites(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    )
+  }
+
+  const getStockBadge = (stock: number) => {
+    if (stock === 0) return <Badge variant="destructive">Out of Stock</Badge>
+    if (stock < 10) return <Badge variant="secondary">Low Stock</Badge>
+    return <Badge variant="outline">In Stock</Badge>
+  }
+
+  const renderStars = (rating: number = 0) => {
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${
+              star <= rating 
+                ? "fill-yellow-400 text-yellow-400" 
+                : "text-gray-300"
+            }`}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  const ProductCard = ({ product }: { product: Product }) => (
+    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+      <CardHeader className="p-0 relative">
+        <div className="aspect-square relative overflow-hidden">
+          <Image
+            src={product.image_url || "/placeholder.svg?height=300&width=300"}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          
+          {/* Overlay actions */}
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+            <Button size="sm" variant="secondary" asChild>
+              <Link href={`/products/${product.id}`}>
+                <Eye className="w-4 h-4 mr-1" />
+                View
+              </Link>
+            </Button>
+            <Button 
+              size="sm" 
+              variant="secondary"
+              onClick={() => toggleFavorite(product.id)}
+            >
+              <Heart 
+                className={`w-4 h-4 ${
+                  favorites.includes(product.id) 
+                    ? "fill-red-500 text-red-500" 
+                    : ""
+                }`} 
+              />
+            </Button>
+          </div>
+          
+          {/* Badges */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {product.is_featured && (
+              <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                Featured
+              </Badge>
+            )}
+            {getStockBadge(product.stock)}
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <div className="flex items-start justify-between">
+            <CardTitle className="text-lg line-clamp-1 group-hover:text-purple-600 transition-colors">
+              {product.name}
+            </CardTitle>
+            <div className="text-right">
+              <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                ${product.price}
+              </div>
+            </div>
+          </div>
+          
+          <CardDescription className="text-sm line-clamp-2 min-h-[2.5rem]">
+            {product.description}
+          </CardDescription>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {renderStars(product.rating)}
+              {product.reviews_count && (
+                <span className="text-sm text-muted-foreground">
+                  ({product.reviews_count})
+                </span>
+              )}
+            </div>
+            <Badge variant="outline" className="text-xs">
+              {product.category}
+            </Badge>
+          </div>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0 flex gap-2">
+        <Link href={`/products/${product.id}`} className="flex-1">
+          <Button variant="outline" className="w-full group-hover:border-purple-500 transition-colors">
+            View Details
+          </Button>
+        </Link>
+        <Button 
+          onClick={() => handleAddToCart(product.id)} 
+          disabled={product.stock === 0}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          size="icon"
+        >
+          <ShoppingCart className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+
+  const ProductListItem = ({ product }: { product: Product }) => (
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+      <div className="flex">
+        <div className="w-48 aspect-square relative">
+          <Image
+            src={product.image_url || "/placeholder.svg?height=200&width=200"}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="flex-1 p-6">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-xl font-semibold">{product.name}</h3>
+                {product.is_featured && (
+                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                    Featured
+                  </Badge>
+                )}
+              </div>
+              <p className="text-muted-foreground mb-3">{product.description}</p>
+              <div className="flex items-center gap-4 mb-3">
+                {renderStars(product.rating)}
+                {product.reviews_count && (
+                  <span className="text-sm text-muted-foreground">
+                    ({product.reviews_count} reviews)
+                  </span>
+                )}
+                <Badge variant="outline">{product.category}</Badge>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                ${product.price}
+              </div>
+              {getStockBadge(product.stock)}
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Link href={`/products/${product.id}`} className="flex-1">
+              <Button variant="outline" className="w-full">
+                View Details
+              </Button>
+            </Link>
+            <Button 
+              onClick={() => handleAddToCart(product.id)} 
+              disabled={product.stock === 0}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add to Cart
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => toggleFavorite(product.id)}
+            >
+              <Heart 
+                className={`w-4 h-4 ${
+                  favorites.includes(product.id) 
+                    ? "fill-red-500 text-red-500" 
+                    : ""
+                }`} 
+              />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Card>
+  )
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Products</h1>
-
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="electronics">Electronics</SelectItem>
-              <SelectItem value="clothing">Clothing</SelectItem>
-              <SelectItem value="books">Books</SelectItem>
-              <SelectItem value="home">Home & Garden</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Our Products
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Discover amazing products curated just for you. Quality, style, and value in every item.
+          </p>
         </div>
 
-        {/* Products Grid */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p>Loading products...</p>
+        {/* Filters and Controls */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-sm border border-white/20">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 bg-white/50"
+              />
+            </div>
+            
+            {/* Category Filter */}
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-full lg:w-48 bg-white/50">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="electronics">Electronics</SelectItem>
+                <SelectItem value="clothing">Clothing</SelectItem>
+                <SelectItem value="books">Books</SelectItem>
+                <SelectItem value="home">Home & Garden</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {/* Sort */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full lg:w-48 bg-white/50">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="name">Name A-Z</SelectItem>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {/* View Mode */}
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <Card key={product.id} className="overflow-hidden">
-                <CardHeader className="p-0">
-                  <div className="aspect-square relative">
-                    <Image
-                      src={product.image_url || "/placeholder.svg?height=300&width=300"}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg mb-2">{product.name}</CardTitle>
-                  <CardDescription className="text-sm mb-2">{product.description}</CardDescription>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">${product.price}</span>
-                    <span className="text-sm text-muted-foreground">Stock: {product.stock}</span>
-                  </div>
-                </CardContent>
-                <CardFooter className="p-4 pt-0 flex gap-2">
-                  <Link href={`/products/${product.id}`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      View Details
-                    </Button>
-                  </Link>
-                  <Button onClick={() => handleAddToCart(product.id)} disabled={product.stock === 0} size="icon">
-                    <ShoppingCart className="h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        )}
+        </div>
 
-        {products.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No products found</p>
+        {/* Products */}
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-6"></div>
+            <p className="text-lg text-muted-foreground">Loading amazing products...</p>
+          </div>
+        ) : products.length > 0 ? (
+          <>
+            {/* Results Count */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-muted-foreground">
+                Showing {products.length} product{products.length !== 1 ? 's' : ''}
+                {search && ` for "${search}"`}
+                {category && category !== "all" && ` in ${category}`}
+              </p>
+            </div>
+
+            {/* Products Grid/List */}
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {products.map((product) => (
+                  <ProductListItem key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-20">
+            <Package className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+            <h3 className="text-2xl font-semibold text-gray-600 mb-2">No products found</h3>
+            <p className="text-muted-foreground mb-6">
+              {search || category !== "all" 
+                ? "Try adjusting your search or filters" 
+                : "Products will appear here once they're added"}
+            </p>
+            {(search || category !== "all") && (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSearch("")
+                  setCategory("")
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         )}
       </div>
