@@ -376,7 +376,7 @@ export default function ProductDetailsPage() {
               {/* Price */}
               <div className="mb-6">
                 <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                  ${product.price.toFixed(2)}
+                  ₹{product.price.toFixed(2)}
                 </div>
               </div>
 
@@ -428,7 +428,7 @@ export default function ProductDetailsPage() {
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold h-12"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  Add to Cart - ${(product.price * quantity).toFixed(2)}
+                  Add to Cart - ₹{(product.price * quantity).toFixed(2)}
                 </Button>
               </div>
             )}
@@ -448,7 +448,7 @@ export default function ProductDetailsPage() {
           <Card className="text-center p-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
             <Truck className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Free Shipping</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">On orders over $50</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">On orders over ₹50</p>
           </Card>
           
           <Card className="text-center p-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
@@ -502,7 +502,7 @@ export default function ProductDetailsPage() {
                       {relatedProduct.name}
                     </CardTitle>
                     <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent mt-2">
-                      ${relatedProduct.price}
+                      ₹{relatedProduct.price}
                     </div>
                   </CardContent>
                 </Card>

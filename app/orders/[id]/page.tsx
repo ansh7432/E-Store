@@ -356,8 +356,8 @@ export default function OrderDetailsPage({
         doc.text(productName, 25, yPos + 4)
         
         doc.text(item.quantity.toString(), 125, yPos + 4)
-        doc.text(`$${item.price.toFixed(2)}`, 140, yPos + 4)
-        doc.text(`$${itemTotal.toFixed(2)}`, 170, yPos + 4)
+        doc.text(`₹${item.price.toFixed(2)}`, 140, yPos + 4)
+        doc.text(`₹${itemTotal.toFixed(2)}`, 170, yPos + 4)
         
         yPos += 12
       })
@@ -373,7 +373,7 @@ export default function OrderDetailsPage({
       
       // Subtotal
       doc.text('Subtotal:', 140, yPos)
-      doc.text(`$${subtotal.toFixed(2)}`, 170, yPos)
+      doc.text(`₹${subtotal.toFixed(2)}`, 170, yPos)
       
       // Shipping
       yPos += 8
@@ -385,7 +385,7 @@ export default function OrderDetailsPage({
       yPos += 8
       doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
       doc.text('Tax:', 140, yPos)
-      doc.text('$0.00', 170, yPos)
+      doc.text('₹0.00', 170, yPos)
       
       // Total
       yPos += 12
@@ -396,7 +396,7 @@ export default function OrderDetailsPage({
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold')
       doc.text('TOTAL:', 140, yPos + 2)
-      doc.text(`$${order.total_amount.toFixed(2)}`, 170, yPos + 2)
+      doc.text(`₹${order.total_amount.toFixed(2)}`, 170, yPos + 2)
       
       // Footer
       yPos = 260
@@ -720,7 +720,7 @@ export default function OrderDetailsPage({
                     <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
                     <div className="font-medium text-green-800">Total</div>
                     <div className="text-sm text-green-600 mt-1 font-semibold">
-                      ${order.total_amount.toFixed(2)}
+                      ₹{order.total_amount.toFixed(2)}
                     </div>
                   </div>
                   
@@ -782,7 +782,7 @@ export default function OrderDetailsPage({
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                               <div className="text-sm text-gray-600 dark:text-gray-400">
-                                <span className="font-medium">${item.price.toFixed(2)} × {item.quantity}</span>
+                                <span className="font-medium">₹{item.price.toFixed(2)} × {item.quantity}</span>
                               </div>
                               <Badge variant="outline" className="text-xs">
                                 Qty: {item.quantity}
@@ -790,7 +790,7 @@ export default function OrderDetailsPage({
                             </div>
                             <div className="text-right">
                               <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                ${(item.price * item.quantity).toFixed(2)}
+                                ₹{(item.price * item.quantity).toFixed(2)}
                               </div>
                             </div>
                           </div>
@@ -818,7 +818,7 @@ export default function OrderDetailsPage({
                   {order.items.map((item, index) => (
                     <div key={item.id || index} className="flex justify-between text-sm">
                       <span className="line-clamp-1">{item.product_name} (×{item.quantity})</span>
-                      <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -828,7 +828,7 @@ export default function OrderDetailsPage({
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>${order.total_amount.toFixed(2)}</span>
+                    <span>₹{order.total_amount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
@@ -836,7 +836,7 @@ export default function OrderDetailsPage({
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Tax</span>
-                    <span>$0.00</span>
+                    <span>₹0.00</span>
                   </div>
                 </div>
                 
@@ -845,7 +845,7 @@ export default function OrderDetailsPage({
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    ${order.total_amount.toFixed(2)}
+                    ₹{order.total_amount.toFixed(2)}
                   </span>
                 </div>
               </CardContent>

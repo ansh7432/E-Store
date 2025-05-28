@@ -540,7 +540,7 @@ export default function VendorProductsPage() {
                   
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                      ${product.price.toFixed(2)}
+                      ₹{product.price.toFixed(2)}
                     </span>
                     <div className="text-right">
                       <div className="text-sm text-gray-500 dark:text-gray-400">Stock</div>

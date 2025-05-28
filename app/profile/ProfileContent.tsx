@@ -555,7 +555,7 @@ export default function ProfileContent() {
                       <div className="text-xs text-gray-500">Orders</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-green-600">${userStats.total_spent.toFixed(0)}</div>
+                      <div className="text-2xl font-bold text-green-600">₹{userStats.total_spent.toFixed(0)}</div>
                       <div className="text-xs text-gray-500">Spent</div>
                     </div>
                     <div>

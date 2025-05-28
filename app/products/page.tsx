@@ -396,7 +396,7 @@ export default function ProductsPage() {
             </CardTitle>
             <div className="text-right">
               <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                ${product.price}
+                ₹{product.price}
               </div>
             </div>
           </div>
@@ -489,7 +489,7 @@ export default function ProductsPage() {
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent mb-2">
-                ${product.price}
+                ₹{product.price}
               </div>
               {getStockBadge(product.stock)}
             </div>
@@ -628,7 +628,7 @@ export default function ProductsPage() {
                 {/* Price Range */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                    Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                    Price Range: ₹{filters.priceRange[0]} - ₹{filters.priceRange[1]}
                   </label>
                   <Slider
                     value={filters.priceRange}
