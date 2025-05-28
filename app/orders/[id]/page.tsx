@@ -1,4 +1,3 @@
-// app/orders/[id]/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -37,7 +36,8 @@ import {
   Heart,
   ShoppingCart,
   Copy,
-  Check
+  Check,
+  FileText
 } from "lucide-react"
 
 interface OrderItem {
@@ -83,6 +83,7 @@ export default function OrderDetailsPage({
   const [orderId, setOrderId] = useState<string>("")
   const [isCopied, setIsCopied] = useState(false)
   const [reordering, setReordering] = useState(false)
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false)
 
   useEffect(() => {
     const resolveParams = async () => {
@@ -236,6 +237,202 @@ export default function OrderDetailsPage({
       })
     } finally {
       setReordering(false)
+    }
+  }
+
+  const generateAndDownloadInvoice = async () => {
+    if (!order || !user) return
+    
+    setDownloadingInvoice(true)
+    
+    try {
+      // Generate PDF using jsPDF
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF()
+      
+      // Colors
+      const primaryColor = [147, 51, 234] // Purple
+      const secondaryColor = [236, 72, 153] // Pink
+      const darkGray = [55, 65, 81]
+      const lightGray = [156, 163, 175]
+      
+      // Header
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.rect(0, 0, 210, 40, 'F')
+      
+      // Company Logo/Name
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(24)
+      doc.setFont('helvetica', 'bold')
+      doc.text('ShopEase', 20, 25)
+      
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'normal')
+      doc.text('Your Premium E-commerce Store', 20, 32)
+      
+      // Invoice Title
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+      doc.setFontSize(28)
+      doc.setFont('helvetica', 'bold')
+      doc.text('INVOICE', 140, 25)
+      
+      // Order Details
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Order #${order.id}`, 140, 32)
+      doc.text(`Date: ${new Date(order.created_at).toLocaleDateString()}`, 140, 37)
+      
+      // Customer Information
+      let yPos = 60
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.text('Bill To:', 20, yPos)
+      
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+      doc.text(user.username || 'Customer', 20, yPos + 8)
+      doc.text(user.email || '', 20, yPos + 16)
+      
+      if (order.shipping_address) {
+        doc.text(order.shipping_address.street, 20, yPos + 24)
+        doc.text(`${order.shipping_address.city}, ${order.shipping_address.state} ${order.shipping_address.zip}`, 20, yPos + 32)
+        doc.text(order.shipping_address.country, 20, yPos + 40)
+      }
+      
+      // Order Status
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.text('Order Status:', 120, yPos)
+      
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+      doc.text(order.status.charAt(0).toUpperCase() + order.status.slice(1), 120, yPos + 8)
+      doc.text(`Payment ID: ${order.payment_intent_id.slice(0, 16)}...`, 120, yPos + 16)
+      
+      if (order.tracking_number) {
+        doc.text(`Tracking: ${order.tracking_number}`, 120, yPos + 24)
+      }
+      
+      // Table Header
+      yPos = 120
+      doc.setFillColor(240, 240, 240)
+      doc.rect(20, yPos, 170, 10, 'F')
+      
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+      doc.text('Item', 25, yPos + 7)
+      doc.text('Qty', 120, yPos + 7)
+      doc.text('Price', 140, yPos + 7)
+      doc.text('Total', 170, yPos + 7)
+      
+      // Table Items
+      yPos += 15
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      
+      let subtotal = 0
+      
+      order.items.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity
+        subtotal += itemTotal
+        
+        // Alternate row background
+        if (index % 2 === 0) {
+          doc.setFillColor(250, 250, 250)
+          doc.rect(20, yPos - 3, 170, 12, 'F')
+        }
+        
+        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+        
+        // Product name (truncate if too long)
+        const productName = item.product_name.length > 35 
+          ? item.product_name.substring(0, 35) + '...' 
+          : item.product_name
+        doc.text(productName, 25, yPos + 4)
+        
+        doc.text(item.quantity.toString(), 125, yPos + 4)
+        doc.text(`$${item.price.toFixed(2)}`, 140, yPos + 4)
+        doc.text(`$${itemTotal.toFixed(2)}`, 170, yPos + 4)
+        
+        yPos += 12
+      })
+      
+      // Totals
+      yPos += 10
+      doc.setDrawColor(lightGray[0], lightGray[1], lightGray[2])
+      doc.line(20, yPos, 190, yPos)
+      
+      yPos += 10
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      
+      // Subtotal
+      doc.text('Subtotal:', 140, yPos)
+      doc.text(`$${subtotal.toFixed(2)}`, 170, yPos)
+      
+      // Shipping
+      yPos += 8
+      doc.text('Shipping:', 140, yPos)
+      doc.setTextColor(34, 197, 94) // Green
+      doc.text('FREE', 170, yPos)
+      
+      // Tax
+      yPos += 8
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+      doc.text('Tax:', 140, yPos)
+      doc.text('$0.00', 170, yPos)
+      
+      // Total
+      yPos += 12
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
+      doc.rect(130, yPos - 5, 60, 12, 'F')
+      
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('TOTAL:', 140, yPos + 2)
+      doc.text(`$${order.total_amount.toFixed(2)}`, 170, yPos + 2)
+      
+      // Footer
+      yPos = 260
+      doc.setTextColor(lightGray[0], lightGray[1], lightGray[2])
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'normal')
+      doc.text('Thank you for your business!', 20, yPos)
+      doc.text('For support, contact us at support@shopease.com', 20, yPos + 5)
+      doc.text(`Invoice generated on ${new Date().toLocaleDateString()}`, 20, yPos + 10)
+      
+      // Terms (if space allows)
+      if (yPos < 280) {
+        yPos += 20
+        doc.setFontSize(7)
+        doc.text('Terms & Conditions: All sales are final. Returns accepted within 30 days.', 20, yPos)
+        doc.text('This invoice was generated electronically and is valid without signature.', 20, yPos + 4)
+      }
+      
+      // Save the PDF
+      const fileName = `invoice-${order.id}-${new Date().toISOString().split('T')[0]}.pdf`
+      doc.save(fileName)
+      
+      toast({
+        title: "Invoice Downloaded",
+        description: "Your invoice has been downloaded successfully",
+      })
+      
+    } catch (error) {
+      console.error('Error generating invoice:', error)
+      toast({
+        title: "Download Failed",
+        description: "Failed to generate invoice. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setDownloadingInvoice(false)
     }
   }
 
@@ -674,9 +871,20 @@ export default function OrderDetailsPage({
                   Reorder Items
                 </Button>
                 
-                <Button variant="outline" className="w-full justify-start">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Invoice
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200"
+                  onClick={generateAndDownloadInvoice}
+                  disabled={downloadingInvoice}
+                >
+                  {downloadingInvoice ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin text-green-600" />
+                  ) : (
+                    <FileText className="w-4 h-4 mr-2 text-green-600" />
+                  )}
+                  <span className="text-green-700">
+                    {downloadingInvoice ? 'Generating PDF...' : 'Download Invoice'}
+                  </span>
                 </Button>
                 
                 <Button variant="outline" className="w-full justify-start">

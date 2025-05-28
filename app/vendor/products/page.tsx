@@ -1,3 +1,4 @@
+// app/vendor/products/page.tsx
 "use client"
 
 import type React from "react"
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -22,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { Navbar } from "@/components/navbar"
-import { Plus, Edit, Trash2, Package } from "lucide-react"
+import { Plus, Edit, Trash2, Package, DollarSign, Archive } from "lucide-react"
 
 interface Product {
   id: number
@@ -83,7 +85,7 @@ export default function VendorProductsPage() {
   }, [user, authLoading, isAuthenticated])
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem("token") // Changed from "access_token" to "token"
+    const token = localStorage.getItem("token")
     console.log('Getting auth headers, token exists:', !!token)
     
     if (!token) {
@@ -266,15 +268,25 @@ export default function VendorProductsPage() {
     setIsDialogOpen(true)
   }
 
+  const getStockBadge = (stock: number) => {
+    if (stock === 0) {
+      return <Badge variant="destructive" className="text-xs">Out of Stock</Badge>
+    } else if (stock < 10) {
+      return <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">Low Stock</Badge>
+    } else {
+      return <Badge variant="outline" className="text-xs bg-green-100 text-green-800">In Stock</Badge>
+    }
+  }
+
   // Show loading while auth is loading
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-            <p className="text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600"></div>
+            <p className="text-lg text-gray-600">Loading...</p>
           </div>
         </div>
       </div>
@@ -291,164 +303,254 @@ export default function VendorProductsPage() {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              My Products
-            </h1>
-            <p className="text-gray-600 mt-2">Manage your product inventory</p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                onClick={resetForm}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Product
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
-                <DialogDescription>
-                  {editingProduct ? "Update your product details" : "Create a new product for your store"}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Product Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    placeholder="Enter product name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    required
-                    placeholder="Enter product description"
-                    rows={3}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="price">Price ($)</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      required
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="stock">Stock</Label>
-                    <Input
-                      id="stock"
-                      type="number"
-                      min="0"
-                      value={formData.stock}
-                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                      required
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="electronics">Electronics</SelectItem>
-                      <SelectItem value="clothing">Clothing</SelectItem>
-                      <SelectItem value="books">Books</SelectItem>
-                      <SelectItem value="home">Home & Garden</SelectItem>
-                      <SelectItem value="sports">Sports & Outdoors</SelectItem>
-                      <SelectItem value="beauty">Beauty & Personal Care</SelectItem>
-                      <SelectItem value="toys">Toys & Games</SelectItem>
-                      <SelectItem value="food">Food & Beverages</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="image_url">Image URL (optional)</Label>
-                  <Input
-                    id="image_url"
-                    type="url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={submitLoading}>
-                  {submitLoading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      {editingProduct ? "Updating..." : "Creating..."}
-                    </div>
-                  ) : (
-                    editingProduct ? "Update Product" : "Create Product"
-                  )}
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                My Products
+              </h1>
+              <p className="text-gray-600 text-lg">Manage your product inventory and listings</p>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={resetForm}
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg"
+                >
+                  <Plus className="mr-2 h-5 w-5" />
+                  Add Product
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-sm">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                    <Package className="w-6 h-6 text-purple-600" />
+                    {editingProduct ? "Edit Product" : "Add New Product"}
+                  </DialogTitle>
+                  <DialogDescription className="text-base">
+                    {editingProduct ? "Update your product details" : "Create a new product for your store"}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <Label htmlFor="name" className="text-base font-medium">Product Name</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                        placeholder="Enter product name"
+                        className="bg-white/80 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="description" className="text-base font-medium">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        required
+                        placeholder="Enter detailed product description"
+                        rows={4}
+                        className="bg-white/80 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="price" className="text-base font-medium">Price ($)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        required
+                        placeholder="0.00"
+                        className="bg-white/80 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="stock" className="text-base font-medium">Stock Quantity</Label>
+                      <Input
+                        id="stock"
+                        type="number"
+                        min="0"
+                        value={formData.stock}
+                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                        required
+                        placeholder="0"
+                        className="bg-white/80 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="category" className="text-base font-medium">Category</Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(value) => setFormData({ ...formData, category: value })}
+                        required
+                      >
+                        <SelectTrigger className="bg-white/80 border-gray-200 focus:border-purple-400 focus:ring-purple-400">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="electronics">Electronics</SelectItem>
+                          <SelectItem value="clothing">Clothing</SelectItem>
+                          <SelectItem value="books">Books</SelectItem>
+                          <SelectItem value="home">Home & Garden</SelectItem>
+                          <SelectItem value="sports">Sports & Outdoors</SelectItem>
+                          <SelectItem value="beauty">Beauty & Personal Care</SelectItem>
+                          <SelectItem value="toys">Toys & Games</SelectItem>
+                          <SelectItem value="food">Food & Beverages</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="image_url" className="text-base font-medium">Image URL (optional)</Label>
+                      <Input
+                        id="image_url"
+                        type="url"
+                        value={formData.image_url}
+                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                        className="bg-white/80 border-gray-200 focus:border-purple-400 focus:ring-purple-400"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-3 pt-4 border-t">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={submitLoading}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    >
+                      {submitLoading ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          {editingProduct ? "Updating..." : "Creating..."}
+                        </div>
+                      ) : (
+                        editingProduct ? "Update Product" : "Create Product"
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900">{products.length}</div>
+                    <div className="text-sm text-gray-600">Total Products</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      ${products.reduce((sum, p) => sum + p.price, 0).toFixed(0)}
+                    </div>
+                    <div className="text-sm text-gray-600">Total Value</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl">
+                    <Archive className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      {products.filter(p => p.stock < 10).length}
+                    </div>
+                    <div className="text-sm text-gray-600">Low Stock Items</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p>Loading products...</p>
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-6"></div>
+            <p className="text-lg text-gray-600">Loading products...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardHeader className="p-0">
-                  <div className="aspect-square relative">
+              <Card key={product.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/80 backdrop-blur-sm border-white/20">
+                <CardHeader className="p-0 relative">
+                  <div className="aspect-square relative overflow-hidden">
                     <Image
                       src={product.image_url || "/placeholder.svg?height=300&width=300"}
                       alt={product.name}
                       fill
-                      className="object-cover rounded-t-lg"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
+                    {/* Category Badge */}
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-black/70 text-white capitalize text-xs">
+                        {product.category}
+                      </Badge>
+                    </div>
+                    {/* Stock Badge */}
+                    <div className="absolute top-3 right-3">
+                      {getStockBadge(product.stock)}
+                    </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg mb-2 line-clamp-2">{product.name}</CardTitle>
-                  <CardDescription className="text-sm mb-2 line-clamp-2">{product.description}</CardDescription>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-purple-600">${product.price.toFixed(2)}</span>
-                    <span className={`text-sm px-2 py-1 rounded ${
-                      product.stock > 10 ? 'bg-green-100 text-green-800' : 
-                      product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      Stock: {product.stock}
+                <CardContent className="p-6">
+                  <CardTitle className="text-xl mb-3 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                    {product.name}
+                  </CardTitle>
+                  <CardDescription className="text-sm mb-4 line-clamp-2 text-gray-600">
+                    {product.description}
+                  </CardDescription>
+                  
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      ${product.price.toFixed(2)}
                     </span>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-500">Stock</div>
+                      <div className="text-lg font-semibold">{product.stock}</div>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+                  
+                  <div className="flex gap-3">
                     <Button 
                       variant="outline" 
                       size="sm" 
                       onClick={() => openEditDialog(product)} 
-                      className="flex-1"
+                      className="flex-1 bg-white/50 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700"
                     >
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
@@ -457,7 +559,7 @@ export default function VendorProductsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(product.id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      className="bg-white/50 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -469,16 +571,21 @@ export default function VendorProductsPage() {
         )}
 
         {products.length === 0 && !loading && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">No Products Yet</h3>
-              <p className="text-gray-500 mb-4">You haven't created any products yet. Start building your inventory!</p>
+          <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <CardContent className="text-center py-20">
+              <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                <Package className="w-12 h-12 text-purple-600" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-600 mb-4">No Products Yet</h3>
+              <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                You haven't created any products yet. Start building your inventory and showcase your amazing products to customers!
+              </p>
               <Button 
                 onClick={() => setIsDialogOpen(true)}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-2 h-5 w-5" />
                 Create Your First Product
               </Button>
             </CardContent>
