@@ -2,7 +2,8 @@
 
 A modern, full-featured e-commerce platform built with Next.js 14, FastAPI, and PostgreSQL. Features a beautiful UI with dark mode support, comprehensive product management, secure payments, and vendor capabilities.
 
-![Kommercio Homepage](https://via.placeholder.com/800x400/6366f1/ffffff?text=Kommercio+E-commerce+Platform)
+![Screenshot 2025-05-28 at 8 50 48 PM](https://github.com/user-attachments/assets/edb9bd38-a3e1-4cf7-b4b1-2955351520ef)
+
 
 ## ✨ Features
 
