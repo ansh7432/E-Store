@@ -13,6 +13,7 @@ interface CartItem {
     name: string
     price: number
     image_url?: string
+    stock?: number
   }
 }
 
@@ -26,6 +27,7 @@ interface CartContextType {
   clearCart: () => void
   loading: boolean
   fetchCart: () => Promise<void>
+  error: string | null
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -33,23 +35,29 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const { user, isAuthenticated, logout } = useAuth()
   const { toast } = useToast()
 
-  // Fetch cart when user logs in
+  // Reset cart when user logs out
   useEffect(() => {
-    console.log('Cart context - user changed:', { user: !!user, isAuthenticated })
+    console.log('Cart context - auth state changed:', { 
+      user: !!user, 
+      isAuthenticated,
+      userId: user?.id 
+    })
+    
     if (isAuthenticated && user) {
       console.log('User authenticated, fetching cart')
       fetchCart()
     } else {
       console.log('User not authenticated, clearing cart')
       setItems([])
+      setError(null)
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user?.id]) // Include user.id to catch user changes
 
   const getAuthHeaders = () => {
-    // Check for token in the correct key (the auth context uses "token")
     const token = localStorage.getItem("token")
     console.log('Cart - Getting auth headers, token exists:', !!token)
     
@@ -63,18 +71,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const handleAuthError = (response: Response) => {
+    if (response.status === 401) {
+      console.log('Unauthorized access, logging out')
+      logout()
+      toast({
+        title: "Session expired",
+        description: "Please login again",
+        variant: "destructive"
+      })
+      return true
+    }
+    return false
+  }
+
   const fetchCart = async () => {
     if (!isAuthenticated || !user) {
       console.log('Not authenticated, skipping cart fetch')
+      setItems([])
       return
     }
 
+    setLoading(true)
+    setError(null)
+
     try {
-      console.log('Fetching cart...')
+      console.log('Fetching cart for user:', user.id)
       const headers = getAuthHeaders()
       
-      const response = await fetch("api/cart", {
-        headers
+      const response = await fetch("/api/cart", {
+        headers,
+        cache: 'no-store' // Prevent caching issues
       })
 
       console.log('Cart fetch response status:', response.status)
@@ -82,27 +109,66 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json()
         console.log('Cart data received:', data)
-        setItems(data.items || [])
-      } else if (response.status === 401) {
-        console.log('Unauthorized cart access, logging out')
-        logout()
-        toast({
-          title: "Session expired",
-          description: "Please login again",
-          variant: "destructive"
-        })
+        
+        // Handle different response formats
+        if (data.items) {
+          setItems(data.items)
+        } else if (Array.isArray(data)) {
+          setItems(data)
+        } else {
+          setItems([])
+        }
+        
+        setError(null)
+      } else if (response.status === 404) {
+        // Cart doesn't exist yet - this is normal for new users
+        console.log('Cart not found (404) - initializing empty cart')
+        setItems([])
+        setError(null)
+      } else if (handleAuthError(response)) {
+        return // Auth error handled
       } else {
-        console.error('Failed to fetch cart, status:', response.status)
-        const errorData = await response.json()
-        console.error('Cart fetch error:', errorData)
+        // Try to get error message from response
+        let errorMessage = `Failed to fetch cart (${response.status})`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.detail || errorData.message || errorMessage
+        } catch {
+          // If JSON parsing fails, try text
+          try {
+            const errorText = await response.text()
+            if (errorText && !errorText.includes('<!DOCTYPE')) {
+              errorMessage = errorText
+            }
+          } catch {
+            // Use default message
+          }
+        }
+        
+        console.error('Cart fetch error:', errorMessage)
+        setError(errorMessage)
+        
+        // Don't show toast for cart fetch errors to avoid spam
+        // toast({
+        //   title: "Error",
+        //   description: errorMessage,
+        //   variant: "destructive"
+        // })
       }
     } catch (error) {
-      console.error("Error fetching cart:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load cart",
-        variant: "destructive"
-      })
+      console.error("Network error fetching cart:", error)
+      setError("Network error - please check your connection")
+      
+      // Only show toast for network errors, not HTTP errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast({
+          title: "Connection Error",
+          description: "Please check your internet connection",
+          variant: "destructive"
+        })
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -112,11 +178,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     setLoading(true)
+    setError(null)
+
     try {
-      console.log('Adding to cart:', { productId, quantity })
+      console.log('Adding to cart:', { productId, quantity, userId: user.id })
       const headers = getAuthHeaders()
 
-      const response = await fetch("api/cart/items", {
+      const response = await fetch("/api/cart/items", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -130,21 +198,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         console.log('Successfully added to cart')
         await fetchCart() // Refresh cart after adding
-        toast({
-          title: "Success",
-          description: "Item added to cart"
-        })
-      } else if (response.status === 401) {
-        console.log('Unauthorized add to cart, logging out')
-        logout()
+        // Remove the toast from here - let the UI handle it
+      } else if (handleAuthError(response)) {
         throw new Error("Please login to continue")
       } else {
-        const errorData = await response.json()
-        console.error('Add to cart error:', errorData)
-        throw new Error(errorData.detail || "Failed to add item to cart")
+        let errorMessage = "Failed to add item to cart"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.detail || errorData.message || errorMessage
+        } catch {
+          // Use default message
+        }
+        
+        console.error('Add to cart error:', errorMessage)
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error("Error adding to cart:", error)
+      setError(error instanceof Error ? error.message : "Failed to add to cart")
       throw error
     } finally {
       setLoading(false)
@@ -156,11 +227,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Please login to continue")
     }
 
+    setLoading(true)
+    setError(null)
+
     try {
-      console.log('Removing from cart:', itemId)
+      console.log('Removing from cart:', { itemId, userId: user?.id })
       const headers = getAuthHeaders()
 
-      const response = await fetch(`api/cart/items/${itemId}`, {
+      const response = await fetch(`/api/cart/items/${itemId}`, {
         method: "DELETE",
         headers
       })
@@ -171,19 +245,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         console.log('Successfully removed from cart')
         await fetchCart() // Refresh cart after removing
         toast({
-          title: "Success",
-          description: "Item removed from cart"
+          title: "Removed from cart",
+          description: "Item removed from your cart"
         })
-      } else if (response.status === 401) {
-        logout()
+      } else if (handleAuthError(response)) {
         throw new Error("Please login to continue")
       } else {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || "Failed to remove item from cart")
+        let errorMessage = "Failed to remove item from cart"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.detail || errorData.message || errorMessage
+        } catch {
+          // Use default message
+        }
+        
+        console.error('Remove from cart error:', errorMessage)
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error("Error removing from cart:", error)
+      setError(error instanceof Error ? error.message : "Failed to remove from cart")
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -192,11 +276,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Please login to continue")
     }
 
+    if (quantity <= 0) {
+      // If quantity is 0 or negative, remove the item
+      return removeFromCart(itemId)
+    }
+
+    setLoading(true)
+    setError(null)
+
     try {
-      console.log('Updating cart quantity:', { itemId, quantity })
+      console.log('Updating cart quantity:', { itemId, quantity, userId: user?.id })
       const headers = getAuthHeaders()
 
-      const response = await fetch(`api/cart/items/${itemId}`, {
+      const response = await fetch(`/api/cart/items/${itemId}`, {
         method: "PUT",
         headers,
         body: JSON.stringify({ quantity })
@@ -207,24 +299,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         console.log('Successfully updated quantity')
         await fetchCart() // Refresh cart after updating
-      } else if (response.status === 401) {
-        logout()
+      } else if (handleAuthError(response)) {
         throw new Error("Please login to continue")
       } else {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || "Failed to update quantity")
+        let errorMessage = "Failed to update quantity"
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.detail || errorData.message || errorMessage
+        } catch {
+          // Use default message
+        }
+        
+        console.error('Update quantity error:', errorMessage)
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error("Error updating quantity:", error)
+      setError(error instanceof Error ? error.message : "Failed to update quantity")
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
   const clearCart = () => {
-    console.log('Clearing cart')
+    console.log('Clearing cart locally')
     setItems([])
+    setError(null)
   }
 
+  // Calculate derived values
   const itemCount = items.reduce((total, item) => total + item.quantity, 0)
   const total = items.reduce((total, item) => total + (item.product.price * item.quantity), 0)
 
@@ -237,7 +341,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     updateQuantity,
     clearCart,
     loading,
-    fetchCart
+    fetchCart,
+    error
   }
 
   return (
