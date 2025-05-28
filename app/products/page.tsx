@@ -173,7 +173,7 @@ export default function ProductsPage() {
             className={`w-4 h-4 ${
               star <= rating 
                 ? "fill-yellow-400 text-yellow-400" 
-                : "text-gray-300"
+                : "text-gray-300 dark:text-gray-600"
             }`}
           />
         ))}
@@ -230,7 +230,7 @@ export default function ProductsPage() {
       <CardContent className="p-4">
         <div className="space-y-2">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-lg line-clamp-1 group-hover:text-purple-600 transition-colors">
+            <CardTitle className="text-lg line-clamp-1 group-hover:text-purple-600 transition-colors dark:group-hover:text-purple-400">
               {product.name}
             </CardTitle>
             <div className="text-right">
@@ -300,7 +300,7 @@ export default function ProductsPage() {
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground mb-3">{product.description}</p>
+              <p className="text-muted-foreground mb-3 dark:text-gray-400">{product.description}</p>
               <div className="flex items-center gap-4 mb-3">
                 {renderStars(product.rating)}
                 {product.reviews_count && (
@@ -352,7 +352,7 @@ export default function ProductsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
@@ -367,7 +367,7 @@ export default function ProductsPage() {
         </div>
 
         {/* Filters and Controls */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-sm border border-white/20">
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-sm border border-white/20 dark:border-gray-700/20">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
@@ -376,7 +376,7 @@ export default function ProductsPage() {
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-white/50"
+                className="pl-10 bg-white/50 dark:bg-gray-800/50"
               />
             </div>
             
@@ -464,8 +464,8 @@ export default function ProductsPage() {
         ) : (
           <div className="text-center py-20">
             <Package className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-2xl font-semibold text-gray-600 mb-2">No products found</h3>
-            <p className="text-muted-foreground mb-6">
+            <h3 className="text-2xl font-semibold text-gray-600 mb-2 dark:text-gray-300">No products found</h3>
+            <p className="text-muted-foreground mb-6 dark:text-gray-400">
               {search || category !== "all" 
                 ? "Try adjusting your search or filters" 
                 : "Products will appear here once they're added"}

@@ -79,7 +79,7 @@ export default function LoginPage() {
             <div className="space-y-8 text-center lg:text-left">
               <div className="inline-flex items-center gap-3 bg-white/20 dark:bg-gray-800/40 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30 dark:border-gray-700/30">
                 <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                <span className="text-purple-700 dark:text-purple-300 font-medium">Welcome Back to E-Store</span>
+                <span className="text-purple-700 dark:text-purple-300 font-medium">Welcome Back to Kommercio</span>
               </div>
               
               <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 dark:from-purple-400 dark:via-pink-400 dark:to-orange-400 bg-clip-text text-transparent leading-tight">

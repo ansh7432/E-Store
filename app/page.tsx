@@ -37,7 +37,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent animate-gradient leading-tight">
-              Welcome to E-Store
+              Welcome to Kommercio
             </h1>
             
             <p className="text-xl text-muted-foreground dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -71,7 +71,7 @@ export default function HomePage() {
           <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Why Choose E-Store?
+                Why Choose Kommercio?
               </h2>
               <div className="flex justify-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (

@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 -z-50">
         <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse"></div>
@@ -30,7 +30,7 @@ export default function Loading() {
           {[...Array(8)].map((_, index) => (
             <div 
               key={index} 
-              className="bg-white/80 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg border border-white/30 animate-pulse"
+              className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/20 animate-pulse"
             >
               {/* Image Skeleton */}
               <div className="aspect-square bg-gradient-to-br from-purple-100 to-pink-100 relative overflow-hidden">
@@ -87,7 +87,7 @@ export default function Loading() {
                 <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Loading Products
                 </p>
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                   Discovering amazing deals for you...
                 </p>
               </div>

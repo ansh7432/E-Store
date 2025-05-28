@@ -519,12 +519,12 @@ export default function OrderDetailsPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600"></div>
-            <p className="text-lg text-gray-600">Loading order details...</p>
+            <p className="text-lg text-gray-600 dark:text-gray-300">Loading order details...</p>
           </div>
         </div>
       </div>
@@ -533,14 +533,14 @@ export default function OrderDetailsPage({
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-20">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 max-w-md mx-auto shadow-lg border border-white/20">
-              <Package className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-              <h2 className="text-2xl font-semibold text-gray-600 mb-4">Order Not Found</h2>
-              <p className="text-gray-500 mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-3xl p-12 max-w-md mx-auto shadow-lg border border-white/20 dark:border-gray-700/20">
+              <Package className="w-20 h-20 text-gray-300 dark:text-gray-600 mx-auto mb-6" />
+              <h2 className="text-2xl font-semibold text-gray-600 dark:text-gray-300 mb-4">Order Not Found</h2>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
               <Button onClick={() => router.push("/profile?tab=orders")} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Orders
@@ -555,7 +555,7 @@ export default function OrderDetailsPage({
   const StatusIcon = statusConfig?.icon || AlertCircle
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -566,7 +566,7 @@ export default function OrderDetailsPage({
                 variant="outline" 
                 size="sm" 
                 onClick={() => router.push("/profile?tab=orders")}
-                className="bg-white/50 backdrop-blur-sm"
+                className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Orders
@@ -585,7 +585,7 @@ export default function OrderDetailsPage({
                     {isCopied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
-                <p className="text-gray-600">Order details and tracking information</p>
+                <p className="text-gray-600 dark:text-gray-300">Order details and tracking information</p>
               </div>
             </div>
             
@@ -649,7 +649,7 @@ export default function OrderDetailsPage({
 
           {/* Order Status Progress */}
           {statusConfig && (
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 mb-6">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20 mb-6">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <div className={`p-3 rounded-full ${statusConfig.color}`}>
@@ -662,7 +662,7 @@ export default function OrderDetailsPage({
                         {statusConfig.text}
                       </Badge>
                     </div>
-                    <p className="text-gray-600 mb-3">{statusConfig.description}</p>
+                    <p className="text-gray-600 dark:text-gray-400 mb-3">{statusConfig.description}</p>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full transition-all duration-500 ${statusConfig.color}`}
@@ -687,7 +687,7 @@ export default function OrderDetailsPage({
           {/* Order Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Order Info */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-purple-600" />
@@ -696,7 +696,7 @@ export default function OrderDetailsPage({
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-100/10 rounded-xl">
                     <Calendar className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                     <div className="font-medium text-blue-800">Order Date</div>
                     <div className="text-sm text-blue-600 mt-1">
@@ -708,7 +708,7 @@ export default function OrderDetailsPage({
                     </div>
                   </div>
                   
-                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-100/10 rounded-xl">
                     <Package className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                     <div className="font-medium text-purple-800">Items</div>
                     <div className="text-sm text-purple-600 mt-1">
@@ -716,7 +716,7 @@ export default function OrderDetailsPage({
                     </div>
                   </div>
                   
-                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-100/10 rounded-xl">
                     <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
                     <div className="font-medium text-green-800">Total</div>
                     <div className="text-sm text-green-600 mt-1 font-semibold">
@@ -724,7 +724,7 @@ export default function OrderDetailsPage({
                     </div>
                   </div>
                   
-                  <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
+                  <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-100/10 rounded-xl">
                     <CreditCard className="w-8 h-8 text-orange-600 mx-auto mb-2" />
                     <div className="font-medium text-orange-800">Payment</div>
                     <div className="text-xs text-orange-600 mt-1 font-mono">
@@ -736,7 +736,7 @@ export default function OrderDetailsPage({
             </Card>
 
             {/* Order Items */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5 text-purple-600" />
@@ -747,9 +747,9 @@ export default function OrderDetailsPage({
               <CardContent>
                 <div className="space-y-4">
                   {order.items.map((item, index) => (
-                    <div key={item.id || index} className="group p-4 border border-gray-100 rounded-xl hover:shadow-md transition-all duration-300 bg-white/50">
+                    <div key={item.id || index} className="group p-4 border border-gray-100 dark:border-gray-700 rounded-xl hover:shadow-md transition-all duration-300 bg-white/50 dark:bg-gray-800/50">
                       <div className="flex items-center gap-4">
-                        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                           {item.image_url ? (
                             <Image
                               src={item.image_url}
@@ -767,10 +767,10 @@ export default function OrderDetailsPage({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <h3 className="font-semibold text-lg text-gray-900 line-clamp-1 group-hover:text-purple-600 transition-colors">
+                              <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 line-clamp-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                                 {item.product_name}
                               </h3>
-                              <p className="text-sm text-gray-500">Product ID: {item.product_id}</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Product ID: {item.product_id}</p>
                             </div>
                             <Link href={`/products/${item.product_id}`}>
                               <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -781,7 +781,7 @@ export default function OrderDetailsPage({
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                              <div className="text-sm text-gray-600">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
                                 <span className="font-medium">${item.price.toFixed(2)} × {item.quantity}</span>
                               </div>
                               <Badge variant="outline" className="text-xs">
@@ -806,7 +806,7 @@ export default function OrderDetailsPage({
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Order Summary */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-green-600" />
@@ -852,7 +852,7 @@ export default function OrderDetailsPage({
             </Card>
 
             {/* Quick Actions */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
@@ -873,7 +873,7 @@ export default function OrderDetailsPage({
                 
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-green-200"
+                  className="w-full justify-start bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 dark:hover:from-green-900/30 hover:to-emerald-100 dark:hover:to-emerald-900/30 border-green-200 dark:border-green-800"
                   onClick={generateAndDownloadInvoice}
                   disabled={downloadingInvoice}
                 >
@@ -895,7 +895,7 @@ export default function OrderDetailsPage({
             </Card>
 
             {/* Support */}
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-200 dark:border-blue-800">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <MessageCircle className="w-5 h-5 text-blue-600" />

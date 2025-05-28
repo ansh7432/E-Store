@@ -202,7 +202,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
@@ -219,10 +219,10 @@ export default function CartPage() {
               Continue Shopping
             </Button>
           </div>
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
             Shopping Cart
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground dark:text-gray-300 text-lg">
             Review your items and proceed to secure checkout
           </p>
         </div>
@@ -230,14 +230,14 @@ export default function CartPage() {
         {loading ? (
           <div className="text-center py-20">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-6"></div>
-            <p className="text-lg text-muted-foreground">Loading your cart...</p>
+            <p className="text-lg text-muted-foreground dark:text-gray-300">Loading your cart...</p>
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-20">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-12 max-w-md mx-auto shadow-lg border border-white/20">
-              <ShoppingBag className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-              <h3 className="text-2xl font-semibold text-gray-600 mb-4">Your cart is empty</h3>
-              <p className="text-muted-foreground mb-8">
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-3xl p-12 max-w-md mx-auto shadow-lg border border-white/20 dark:border-gray-700/20">
+              <ShoppingBag className="w-20 h-20 text-gray-300 dark:text-gray-600 mx-auto mb-6" />
+              <h3 className="text-2xl font-semibold text-gray-600 dark:text-gray-300 mb-4">Your cart is empty</h3>
+              <p className="text-muted-foreground dark:text-gray-400 mb-8">
                 Discover amazing products and add them to your cart to get started.
               </p>
               <Button 
@@ -254,7 +254,7 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               {/* Items Header */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-white/20">
+              <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-white/20 dark:border-gray-700/20">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">
                     Cart Items ({items.reduce((sum, item) => sum + item.quantity, 0)})
@@ -269,7 +269,7 @@ export default function CartPage() {
               {/* Cart Items List */}
               <div className="space-y-4">
                 {items.map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-white/20">
+                  <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                     <CardContent className="p-6">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         {/* Product Image */}
@@ -286,7 +286,7 @@ export default function CartPage() {
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                              <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 line-clamp-1">
                                 {item.product.name}
                               </h3>
                               <p className="text-purple-600 font-medium text-lg">
@@ -302,7 +302,7 @@ export default function CartPage() {
                           <div className="flex flex-wrap items-center gap-4 pt-2">
                             {/* Quantity Controls */}
                             <div className="flex items-center gap-3">
-                              <span className="text-sm font-medium text-gray-600">Qty:</span>
+                              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Qty:</span>
                               <div className="flex items-center border rounded-lg bg-white/50">
                                 <Button 
                                   variant="ghost" 
@@ -335,7 +335,7 @@ export default function CartPage() {
                       </div>
                       
                       {/* Action Buttons */}
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <div className="flex gap-2">
                           <Button
                             variant="ghost"
@@ -350,7 +350,7 @@ export default function CartPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeFromCart(item.id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
                             Remove
@@ -368,15 +368,15 @@ export default function CartPage() {
               </div>
 
               {/* Delivery Info */}
-              <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+              <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-green-200 dark:border-green-800">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="p-2 bg-green-100 rounded-full">
                       <Truck className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-green-800">Free Delivery</h3>
-                      <p className="text-sm text-green-600">
+                      <h3 className="font-semibold text-green-800 dark:text-green-300">Free Delivery</h3>
+                      <p className="text-sm text-green-600 dark:text-green-400">
                         {subtotal > 50 ? 
                           "Congratulations! You qualify for free shipping." :
                           `Add $${(50 - subtotal).toFixed(2)} more to qualify for free shipping.`
@@ -384,7 +384,7 @@ export default function CartPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-green-600">
+                  <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
                     <Clock className="w-4 h-4" />
                     Estimated delivery: 3-5 business days
                   </div>
@@ -396,7 +396,7 @@ export default function CartPage() {
             <div className="lg:col-span-1">
               <div className="sticky top-4 space-y-6">
                 {/* Coupon Code */}
-                <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+                <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Tag className="w-5 h-5 text-purple-600" />
@@ -405,14 +405,14 @@ export default function CartPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {appliedCoupon ? (
-                      <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                         <div className="flex items-center gap-2">
                           <div className="p-1 bg-green-100 rounded-full">
                             <Percent className="w-4 h-4 text-green-600" />
                           </div>
                           <div>
-                            <p className="font-medium text-green-800">{appliedCoupon.code}</p>
-                            <p className="text-sm text-green-600">
+                            <p className="font-medium text-green-800 dark:text-green-300">{appliedCoupon.code}</p>
+                            <p className="text-sm text-green-600 dark:text-green-400">
                               {appliedCoupon.type === 'percentage' ? 
                                 `${appliedCoupon.discount}% off` : 
                                 `$${appliedCoupon.discount} off`
@@ -435,12 +435,13 @@ export default function CartPage() {
                           placeholder="Enter promo code"
                           value={couponCode}
                           onChange={(e) => setCouponCode(e.target.value)}
-                          className="bg-white/50"
+                          className="bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         />
                         <Button 
                           onClick={applyCoupon}
                           disabled={!couponCode.trim() || couponLoading}
                           variant="outline"
+                          className="bg-white/50 dark:bg-gray-800/50 hover:bg-purple-100 dark:hover:bg-purple-900/20"
                         >
                           {couponLoading ? "..." : "Apply"}
                         </Button>
@@ -453,7 +454,7 @@ export default function CartPage() {
                 </Card>
 
                 {/* Order Summary */}
-                <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+                <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                   <CardHeader>
                     <CardTitle className="text-xl">Order Summary</CardTitle>
                   </CardHeader>

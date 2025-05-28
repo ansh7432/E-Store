@@ -216,12 +216,12 @@ export default function VendorDashboard() {
 
   if (loading || dashboardLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600"></div>
-            <p className="text-lg text-gray-600">Loading dashboard...</p>
+            <p className="text-lg text-gray-600 dark:text-gray-300">Loading dashboard...</p>
           </div>
         </div>
       </div>
@@ -233,13 +233,13 @@ export default function VendorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/20">
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/20 dark:border-gray-700/20">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="flex items-center gap-6">
                 <div className="p-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl">
@@ -249,7 +249,7 @@ export default function VendorDashboard() {
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Vendor Dashboard
                   </h1>
-                  <p className="text-gray-600 text-lg mt-2">
+                  <p className="text-gray-600 dark:text-gray-300 text-lg mt-2">
                     Welcome back, <span className="font-semibold">{user.username}</span>! 
                     Here's how your store is performing.
                   </p>
@@ -260,7 +260,7 @@ export default function VendorDashboard() {
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-500 fill-current" />
                       <span className="font-medium">{stats.average_rating.toFixed(1)}</span>
-                      <span className="text-gray-500">({stats.total_reviews} reviews)</span>
+                      <span className="text-gray-500 dark:text-gray-400">({stats.total_reviews} reviews)</span>
                     </div>
                   </div>
                 </div>
@@ -285,16 +285,16 @@ export default function VendorDashboard() {
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20 hover:shadow-lg transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Products</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Products</CardTitle>
               <div className="p-2 bg-blue-100 rounded-full">
                 <Package className="h-5 w-5 text-blue-600" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">{stats.total_products}</div>
-              <p className="text-xs text-gray-500 mt-1">Products in your store</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Products in your store</p>
               <div className="flex items-center mt-2">
                 <ArrowUp className="w-3 h-3 text-green-500 mr-1" />
                 <span className="text-xs text-green-600">+2 this week</span>
@@ -302,16 +302,16 @@ export default function VendorDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20 hover:shadow-lg transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Monthly Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Monthly Revenue</CardTitle>
               <div className="p-2 bg-green-100 rounded-full">
                 <DollarSign className="h-5 w-5 text-green-600" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">${stats.monthly_revenue.toLocaleString()}</div>
-              <p className="text-xs text-gray-500 mt-1">Revenue this month</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Revenue this month</p>
               <div className="flex items-center mt-2">
                 <ArrowUp className="w-3 h-3 text-green-500 mr-1" />
                 <span className="text-xs text-green-600">+12% from last month</span>
@@ -319,16 +319,16 @@ export default function VendorDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20 hover:shadow-lg transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Active Orders</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Orders</CardTitle>
               <div className="p-2 bg-orange-100 rounded-full">
                 <ShoppingCart className="h-5 w-5 text-orange-600" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-orange-600">{stats.active_orders}</div>
-              <p className="text-xs text-gray-500 mt-1">Orders to process</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Orders to process</p>
               <div className="flex items-center mt-2">
                 <Activity className="w-3 h-3 text-orange-500 mr-1" />
                 <span className="text-xs text-orange-600">{stats.pending_orders} pending</span>
@@ -336,16 +336,16 @@ export default function VendorDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 hover:shadow-lg transition-all duration-300">
+          <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20 hover:shadow-lg transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Customers</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Customers</CardTitle>
               <div className="p-2 bg-purple-100 rounded-full">
                 <Users className="h-5 w-5 text-purple-600" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-purple-600">{stats.total_customers}</div>
-              <p className="text-xs text-gray-500 mt-1">Unique customers</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unique customers</p>
               <div className="flex items-center mt-2">
                 <ArrowUp className="w-3 h-3 text-green-500 mr-1" />
                 <span className="text-xs text-green-600">+5 new this week</span>
@@ -356,7 +356,7 @@ export default function VendorDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -379,7 +379,7 @@ export default function VendorDashboard() {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Performance Chart Placeholder */}
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-green-600" />
@@ -388,8 +388,8 @@ export default function VendorDashboard() {
                   <CardDescription>Revenue trends over the last 30 days</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 bg-gradient-to-br from-green-50 to-blue-50 rounded-lg flex items-center justify-center">
-                    <div className="text-center text-gray-500">
+                  <div className="h-64 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg flex items-center justify-center">
+                    <div className="text-center text-gray-500 dark:text-gray-400">
                       <BarChart3 className="w-12 h-12 mx-auto mb-2" />
                       <p>Sales chart would go here</p>
                       <p className="text-sm">Connect analytics service</p>
@@ -399,7 +399,7 @@ export default function VendorDashboard() {
               </Card>
 
               {/* Order Status Distribution */}
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <PieChart className="w-5 h-5 text-purple-600" />
@@ -437,15 +437,15 @@ export default function VendorDashboard() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 hover:shadow-lg transition-all duration-300">
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-800 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-purple-700">
+                  <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
                     <Plus className="h-5 w-5" />
                     Add Product
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-purple-600">Quickly add a new product to your inventory.</p>
+                  <p className="text-purple-600 dark:text-purple-400">Quickly add a new product to your inventory.</p>
                   <Button 
                     onClick={() => router.push("/vendor/products")}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
@@ -456,15 +456,15 @@ export default function VendorDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg transition-all duration-300">
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-blue-700">
+                  <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                     <ShoppingCart className="h-5 w-5" />
                     Process Orders
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-blue-600">Manage and fulfill your customer orders.</p>
+                  <p className="text-blue-600 dark:text-blue-400">Manage and fulfill your customer orders.</p>
                   <Button 
                     variant="outline" 
                     className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
@@ -475,15 +475,15 @@ export default function VendorDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg transition-all duration-300">
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-700">
+                  <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
                     <BarChart3 className="h-5 w-5" />
                     View Analytics
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-green-600">Analyze your store performance and insights.</p>
+                  <p className="text-green-600 dark:text-green-400">Analyze your store performance and insights.</p>
                   <Button 
                     variant="outline" 
                     className="w-full border-green-300 text-green-700 hover:bg-green-50"
@@ -498,7 +498,7 @@ export default function VendorDashboard() {
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5 text-purple-600" />
@@ -510,8 +510,8 @@ export default function VendorDashboard() {
                 {recentOrders.length === 0 ? (
                   <div className="text-center py-12">
                     <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">No Orders Yet</h3>
-                    <p className="text-gray-500">Orders will appear here once customers start purchasing.</p>
+                    <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">No Orders Yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400">Orders will appear here once customers start purchasing.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -520,19 +520,19 @@ export default function VendorDashboard() {
                       const StatusIcon = statusConfig.icon
                       
                       return (
-                        <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-4">
                             <div className={`p-2 rounded-full ${statusConfig.color}`}>
                               <StatusIcon className="w-4 h-4 text-white" />
                             </div>
                             <div>
                               <div className="font-medium">Order #{order.id}</div>
-                              <div className="text-sm text-gray-600">{order.customer_name}</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">{order.customer_name}</div>
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="font-bold">${order.total_amount.toFixed(2)}</div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
                               {new Date(order.created_at).toLocaleDateString()}
                             </div>
                           </div>
@@ -547,7 +547,7 @@ export default function VendorDashboard() {
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -569,8 +569,8 @@ export default function VendorDashboard() {
                 {topProducts.length === 0 ? (
                   <div className="text-center py-12">
                     <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">No Products Yet</h3>
-                    <p className="text-gray-500 mb-6">Start by adding your first product to your store.</p>
+                    <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">No Products Yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">Start by adding your first product to your store.</p>
                     <Button 
                       onClick={() => router.push("/vendor/products")}
                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
@@ -582,14 +582,14 @@ export default function VendorDashboard() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {topProducts.map((product, index) => (
-                      <div key={product.id} className="relative p-4 bg-gray-50 rounded-lg">
+                      <div key={product.id} className="relative p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="absolute -top-2 -left-2">
                           <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500">
                             #{index + 1}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-200">
+                          <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
                             {product.image_url ? (
                               <Image
                                 src={product.image_url}
@@ -604,8 +604,8 @@ export default function VendorDashboard() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium line-clamp-1">{product.name}</div>
-                            <div className="text-sm text-gray-600">{product.sales_count} sales</div>
+                            <div className="font-medium line-clamp-1 text-gray-900 dark:text-gray-100">{product.name}</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">{product.sales_count} sales</div>
                             <div className="text-sm font-medium text-green-600">
                               ${product.revenue.toLocaleString()} revenue
                             </div>
@@ -622,7 +622,7 @@ export default function VendorDashboard() {
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-blue-600" />
@@ -631,26 +631,26 @@ export default function VendorDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Conversion Rate</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Conversion Rate</span>
                     <span className="font-medium">3.2%</span>
                   </div>
                   <Progress value={32} className="h-2" />
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Average Order Value</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Average Order Value</span>
                     <span className="font-medium">$87.50</span>
                   </div>
                   <Progress value={65} className="h-2" />
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Customer Retention</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Customer Retention</span>
                     <span className="font-medium">78%</span>
                   </div>
                   <Progress value={78} className="h-2" />
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Award className="w-5 h-5 text-purple-600" />
@@ -658,28 +658,28 @@ export default function VendorDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="font-medium text-green-800">Monthly Revenue Goal</span>
+                      <span className="font-medium text-green-800 dark:text-green-300">Monthly Revenue Goal</span>
                     </div>
-                    <p className="text-sm text-green-700">Achieved 120% of target!</p>
+                    <p className="text-sm text-green-700 dark:text-green-400">Achieved 120% of target!</p>
                   </div>
                   
-                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="w-4 h-4 text-yellow-600" />
-                      <span className="font-medium text-yellow-800">Product Catalog</span>
+                      <span className="font-medium text-yellow-800 dark:text-yellow-300">Product Catalog</span>
                     </div>
-                    <p className="text-sm text-yellow-700">Add 5 more products to reach goal</p>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-400">Add 5 more products to reach goal</p>
                   </div>
                   
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <div className="flex items-center gap-2 mb-2">
                       <Star className="w-4 h-4 text-blue-600" />
-                      <span className="font-medium text-blue-800">Customer Rating</span>
+                      <span className="font-medium text-blue-800 dark:text-blue-300">Customer Rating</span>
                     </div>
-                    <p className="text-sm text-blue-700">Maintain 4.5+ rating</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-400">Maintain 4.5+ rating</p>
                   </div>
                 </CardContent>
               </Card>
@@ -688,9 +688,9 @@ export default function VendorDashboard() {
         </Tabs>
 
         {/* Getting Started Guide */}
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-800">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-700">
+            <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
               <Award className="w-6 h-6" />
               Getting Started as a Vendor
             </CardTitle>
@@ -698,12 +698,12 @@ export default function VendorDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-6 bg-white/80 rounded-xl shadow-sm">
+              <div className="text-center p-6 bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-sm">
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Plus className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-semibold mb-2 text-purple-700">1. Add Products</h3>
-                <p className="text-sm text-purple-600 mb-4">
+                <h3 className="font-semibold mb-2 text-purple-700 dark:text-purple-300">1. Add Products</h3>
+                <p className="text-sm text-purple-600 dark:text-purple-400 mb-4">
                   Start by adding high-quality products with detailed descriptions and images.
                 </p>
                 <Button 
@@ -715,12 +715,12 @@ export default function VendorDashboard() {
                 </Button>
               </div>
               
-              <div className="text-center p-6 bg-white/80 rounded-xl shadow-sm">
+              <div className="text-center p-6 bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-sm">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <TrendingUp className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-semibold mb-2 text-green-700">2. Optimize Pricing</h3>
-                <p className="text-sm text-green-600 mb-4">
+                <h3 className="font-semibold mb-2 text-green-700 dark:text-green-300">2. Optimize Pricing</h3>
+                <p className="text-sm text-green-600 dark:text-green-400 mb-4">
                   Research competitors and set competitive prices to attract customers.
                 </p>
                 <Button size="sm" variant="outline" className="border-green-300 text-green-700">
@@ -728,12 +728,12 @@ export default function VendorDashboard() {
                 </Button>
               </div>
               
-              <div className="text-center p-6 bg-white/80 rounded-xl shadow-sm">
+              <div className="text-center p-6 bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-sm">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-semibold mb-2 text-blue-700">3. Engage Customers</h3>
-                <p className="text-sm text-blue-600 mb-4">
+                <h3 className="font-semibold mb-2 text-blue-700 dark:text-blue-300">3. Engage Customers</h3>
+                <p className="text-sm text-blue-600 dark:text-blue-400 mb-4">
                   Provide excellent customer service and build lasting relationships.
                 </p>
                 <Button size="sm" variant="outline" className="border-blue-300 text-blue-700">

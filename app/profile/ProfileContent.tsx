@@ -501,12 +501,12 @@ export default function ProfileContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header with User Info */}
         <div className="mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/20">
+          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/20 dark:border-gray-700/20">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               {/* Avatar */}
               <div className="relative">
@@ -532,7 +532,7 @@ export default function ProfileContent() {
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       {profile?.username || 'User'}
                     </h1>
-                    <p className="text-gray-600 flex items-center gap-2 mt-1">
+                    <p className="text-gray-600 dark:text-gray-300 flex items-center gap-2 mt-1">
                       <Mail className="w-4 h-4" />
                       {profile?.email}
                     </p>
@@ -568,8 +568,8 @@ export default function ProfileContent() {
                 {/* Profile Completion */}
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Profile Completion</span>
-                    <span className="text-sm text-gray-600">{profileScore}%</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Profile Completion</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{profileScore}%</span>
                   </div>
                   <Progress value={profileScore} className="h-2" />
                 </div>
@@ -579,7 +579,7 @@ export default function ProfileContent() {
         </div>
 
         <Tabs defaultValue={initialTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -601,7 +601,7 @@ export default function ProfileContent() {
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
             {/* Profile Information Card */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
@@ -614,7 +614,7 @@ export default function ProfileContent() {
                   variant="outline"
                   size="sm"
                   onClick={() => setEditingProfile(!editingProfile)}
-                  className="bg-white/50"
+                  className="bg-white/50 dark:bg-gray-800/50"
                 >
                   {editingProfile ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                   {editingProfile ? "Cancel" : "Edit"}
@@ -629,10 +629,10 @@ export default function ProfileContent() {
                         id="username"
                         value={profileForm.username}
                         onChange={(e) => setProfileForm({...profileForm, username: e.target.value})}
-                        className="bg-white/50"
+                        className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                       />
                     ) : (
-                      <div className="p-3 bg-gray-50 rounded-lg border">{profile?.username || 'Not set'}</div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{profile?.username || 'Not set'}</div>
                     )}
                   </div>
                   
@@ -644,10 +644,10 @@ export default function ProfileContent() {
                         type="email"
                         value={profileForm.email}
                         onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
-                        className="bg-white/50"
+                        className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                       />
                     ) : (
-                      <div className="p-3 bg-gray-50 rounded-lg border">{profile?.email || 'Not set'}</div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{profile?.email || 'Not set'}</div>
                     )}
                   </div>
                   
@@ -660,10 +660,10 @@ export default function ProfileContent() {
                         value={profileForm.phone}
                         onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
                         placeholder="+1 (555) 123-4567"
-                        className="bg-white/50"
+                        className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                       />
                     ) : (
-                      <div className="p-3 bg-gray-50 rounded-lg border">{profile?.phone || 'Not set'}</div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{profile?.phone || 'Not set'}</div>
                     )}
                   </div>
                   
@@ -675,10 +675,10 @@ export default function ProfileContent() {
                         value={profileForm.country}
                         onChange={(e) => setProfileForm({...profileForm, country: e.target.value})}
                         placeholder="United States"
-                        className="bg-white/50"
+                        className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                       />
                     ) : (
-                      <div className="p-3 bg-gray-50 rounded-lg border">{profile?.country || 'Not set'}</div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{profile?.country || 'Not set'}</div>
                     )}
                   </div>
                 </div>
@@ -692,10 +692,10 @@ export default function ProfileContent() {
                         value={profileForm.address}
                         onChange={(e) => setProfileForm({...profileForm, address: e.target.value})}
                         placeholder="123 Main Street"
-                        className="bg-white/50"
+                        className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                       />
                     ) : (
-                      <div className="p-3 bg-gray-50 rounded-lg border">{profile?.address || 'Not set'}</div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{profile?.address || 'Not set'}</div>
                     )}
                   </div>
                   
@@ -707,16 +707,16 @@ export default function ProfileContent() {
                         value={profileForm.city}
                         onChange={(e) => setProfileForm({...profileForm, city: e.target.value})}
                         placeholder="New York"
-                        className="bg-white/50"
+                        className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                       />
                     ) : (
-                      <div className="p-3 bg-gray-50 rounded-lg border">{profile?.city || 'Not set'}</div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{profile?.city || 'Not set'}</div>
                     )}
                   </div>
                 </div>
 
                 {editingProfile && (
-                  <div className="flex gap-3 pt-4 border-t">
+                  <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <Button onClick={updateProfile} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                       <Save className="w-4 h-4 mr-2" />
                       Save Changes
@@ -733,13 +733,13 @@ export default function ProfileContent() {
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
             {/* Orders Header */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20 dark:border-gray-700/20">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
                   <h2 className="text-2xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Order History
                   </h2>
-                  <p className="text-gray-600">Track and manage your orders</p>
+                  <p className="text-gray-600 dark:text-gray-300">Track and manage your orders</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Button 
@@ -747,7 +747,7 @@ export default function ProfileContent() {
                     size="sm" 
                     onClick={fetchOrders}
                     disabled={ordersLoading}
-                    className="bg-white/50"
+                    className="bg-white/50 dark:bg-gray-800/50"
                   >
                     {ordersLoading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2"></div>
@@ -756,7 +756,7 @@ export default function ProfileContent() {
                     )}
                     Refresh
                   </Button>
-                  <Badge variant="outline" className="bg-white/50">
+                  <Badge variant="outline" className="bg-white/50 dark:bg-gray-800/50">
                     {orders.length} Total Orders
                   </Badge>
                 </div>
@@ -765,16 +765,16 @@ export default function ProfileContent() {
               {/* Filters */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <Input
                     placeholder="Search orders..."
                     value={orderSearch}
                     onChange={(e) => setOrderSearch(e.target.value)}
-                    className="pl-10 bg-white/50"
+                    className="pl-10 bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <Select value={orderFilter} onValueChange={setOrderFilter}>
-                  <SelectTrigger className="w-full sm:w-48 bg-white/50">
+                  <SelectTrigger className="w-full sm:w-48 bg-white/50 dark:bg-gray-800/50">
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
@@ -794,18 +794,18 @@ export default function ProfileContent() {
             {ordersLoading ? (
               <div className="text-center py-20">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-6"></div>
-                <p className="text-lg text-gray-600">Loading orders...</p>
+                <p className="text-lg text-gray-600 dark:text-gray-300">Loading orders...</p>
               </div>
             ) : filteredOrders.length === 0 ? (
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
                 <CardContent className="text-center py-20">
-                  <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                    <ShoppingBag className="w-10 h-10 text-gray-400" />
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                    <ShoppingBag className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
                     {orderSearch || orderFilter !== "all" ? "No matching orders" : "No Orders Yet"}
                   </h3>
-                  <p className="text-gray-500 mb-6">
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">
                     {orderSearch || orderFilter !== "all" 
                       ? "Try adjusting your search or filters" 
                       : "You haven't placed any orders yet. Start shopping to see your orders here."
@@ -826,7 +826,7 @@ export default function ProfileContent() {
                   const StatusIcon = statusConfig.icon
                   
                   return (
-                    <Card key={order.id} className="bg-white/80 backdrop-blur-sm border-white/20 hover:shadow-lg transition-all duration-300">
+                    <Card key={order.id} className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20 hover:shadow-lg transition-all duration-300">
                       <CardContent className="p-6">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
                           <div className="flex items-start gap-4">
@@ -840,7 +840,7 @@ export default function ProfileContent() {
                                   {statusConfig.text}
                                 </Badge>
                               </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex items-center gap-2">
                                   <Calendar className="w-4 h-4" />
                                   <span>{new Date(order.created_at).toLocaleDateString('en-US', {
@@ -867,7 +867,7 @@ export default function ProfileContent() {
                               variant="outline" 
                               size="sm" 
                               onClick={() => router.push(`/orders/${order.id}`)}
-                              className="bg-white/50"
+                              className="bg-white/50 dark:bg-gray-800/50"
                             >
                               <Eye className="w-4 h-4 mr-2" />
                               View Details
@@ -904,11 +904,11 @@ export default function ProfileContent() {
                         
                         {/* Order Items Preview */}
                         {order.items && order.items.length > 0 && (
-                          <div className="border-t border-gray-100 pt-4">
+                          <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                               {order.items.slice(0, 3).map((item, index) => (
-                                <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                  <div className="relative w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                                <div key={item.id || index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                  <div className="relative w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
                                     {item.image_url ? (
                                       <Image
                                         src={item.image_url}
@@ -918,20 +918,20 @@ export default function ProfileContent() {
                                       />
                                     ) : (
                                       <div className="w-full h-full flex items-center justify-center">
-                                        <Package className="w-6 h-6 text-gray-400" />
+                                        <Package className="w-6 h-6 text-gray-400 dark:text-gray-500" />
                                       </div>
                                     )}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <div className="font-medium text-sm line-clamp-1">{item.product_name}</div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="font-medium text-sm line-clamp-1 text-gray-900 dark:text-gray-100">{item.product_name}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
                                       Qty: {item.quantity} • ${item.price.toFixed(2)}
                                     </div>
                                   </div>
                                 </div>
                               ))}
                               {order.items.length > 3 && (
-                                <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg text-sm text-gray-500">
+                                <div className="flex items-center justify-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-gray-500">
                                   +{order.items.length - 3} more item{order.items.length - 3 !== 1 ? 's' : ''}
                                 </div>
                               )}
@@ -948,7 +948,7 @@ export default function ProfileContent() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bell className="w-5 h-5 text-purple-600" />
@@ -959,12 +959,12 @@ export default function ProfileContent() {
               <CardContent className="space-y-4">
                 <div className="space-y-4">
                   {Object.entries(notificationSettings).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div key={key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div>
-                        <div className="font-medium capitalize">
+                        <div className="font-medium capitalize text-gray-900 dark:text-gray-100">
                           {key.replace(/_/g, ' ')}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           {key === 'email_notifications' && "Receive general email notifications"}
                           {key === 'order_updates' && "Get notified about order status changes"}
                           {key === 'promotional_emails' && "Receive promotional offers and discounts"}
@@ -990,7 +990,7 @@ export default function ProfileContent() {
 
           {/* Security Tab */}
           <TabsContent value="security" className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
@@ -1003,7 +1003,7 @@ export default function ProfileContent() {
                   variant="outline"
                   size="sm"
                   onClick={() => setEditingPassword(!editingPassword)}
-                  className="bg-white/50"
+                  className="bg-white/50 dark:bg-gray-800/50"
                 >
                   {editingPassword ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                   {editingPassword ? "Cancel" : "Change Password"}
@@ -1018,7 +1018,7 @@ export default function ProfileContent() {
                       type="password"
                       value={passwordForm.current_password}
                       onChange={(e) => setPasswordForm({...passwordForm, current_password: e.target.value})}
-                      className="bg-white/50"
+                      className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   
@@ -1029,7 +1029,7 @@ export default function ProfileContent() {
                       type="password"
                       value={passwordForm.new_password}
                       onChange={(e) => setPasswordForm({...passwordForm, new_password: e.target.value})}
-                      className="bg-white/50"
+                      className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   
@@ -1040,7 +1040,7 @@ export default function ProfileContent() {
                       type="password"
                       value={passwordForm.confirm_password}
                       onChange={(e) => setPasswordForm({...passwordForm, confirm_password: e.target.value})}
-                      className="bg-white/50"
+                      className="bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100"
                     />
                   </div>
 
@@ -1061,16 +1061,16 @@ export default function ProfileContent() {
             </Card>
 
             {/* Account Actions */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
               <CardHeader>
-                <CardTitle className="text-red-600">Danger Zone</CardTitle>
+                <CardTitle className="text-red-600 dark:text-red-300">Danger Zone</CardTitle>
                 <CardDescription>Irreversible account actions</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+                <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
                   <div>
-                    <div className="font-medium text-red-800">Delete Account</div>
-                    <div className="text-sm text-red-600">Permanently delete your account and all data</div>
+                    <div className="font-medium text-red-800 dark:text-red-300">Delete Account</div>
+                    <div className="text-sm text-red-600 dark:text-red-400">Permanently delete your account and all data</div>
                   </div>
                   <Button variant="destructive" size="sm">
                     Delete Account

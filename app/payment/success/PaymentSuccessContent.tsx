@@ -84,14 +84,14 @@ export default function PaymentSuccessContent() {
 
   if (processing) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Navbar />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <Card className="w-full max-w-md">
+          <Card className="w-full max-w-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
             <CardContent className="text-center py-12">
-              <Loader className="w-12 h-12 text-purple-600 mx-auto mb-4 animate-spin" />
-              <h2 className="text-xl font-semibold mb-2">Processing Payment...</h2>
-              <p className="text-gray-600">Please wait while we confirm your payment.</p>
+              <Loader className="w-12 h-12 text-purple-600 dark:text-purple-400 mx-auto mb-4 animate-spin" />
+              <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Processing Payment...</h2>
+              <p className="text-gray-600 dark:text-gray-300">Please wait while we confirm your payment.</p>
             </CardContent>
           </Card>
         </div>
@@ -100,21 +100,21 @@ export default function PaymentSuccessContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Navbar />
       <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-white/20 dark:border-gray-700/20">
           <CardHeader className="text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <CardTitle className="text-2xl text-green-600">Payment Successful!</CardTitle>
+            <CheckCircle className="w-16 h-16 text-green-500 dark:text-green-400 mx-auto mb-4" />
+            <CardTitle className="text-2xl text-green-600 dark:text-green-400">Payment Successful!</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-gray-600">Your payment has been processed successfully.</p>
+            <p className="text-gray-600 dark:text-gray-300">Your payment has been processed successfully.</p>
             
             {orderData && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Order ID: #{orderData.order_id}</p>
-                <p className="text-sm text-gray-600">Payment ID: {orderData.payment_id}</p>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Order ID: #{orderData.order_id}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Payment ID: {orderData.payment_id}</p>
               </div>
             )}
             

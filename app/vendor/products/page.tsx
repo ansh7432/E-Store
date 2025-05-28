@@ -275,9 +275,9 @@ export default function VendorProductsPage() {
     if (stock === 0) {
       return <Badge variant="destructive" className="text-xs">Out of Stock</Badge>
     } else if (stock < 10) {
-      return <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">Low Stock</Badge>
+      return <Badge variant="secondary" className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">Low Stock</Badge>
     } else {
-      return <Badge variant="outline" className="text-xs bg-green-100 text-green-800">In Stock</Badge>
+      return <Badge variant="outline" className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">In Stock</Badge>
     }
   }
 
